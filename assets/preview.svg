@@ -1,0 +1,52 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Flux Grid Arena</title>
+  <desc id="desc">Preview image for the Flux Grid Arena GitHub Pages project.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#151321"/>
+      <stop offset="50%" stop-color="#0f1720"/>
+      <stop offset="100%" stop-color="#180d13"/>
+    </linearGradient>
+    <linearGradient id="pulse" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7cffb2"/>
+      <stop offset="100%" stop-color="#62f5ff"/>
+    </linearGradient>
+    <linearGradient id="echo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd37a"/>
+      <stop offset="100%" stop-color="#ffb347"/>
+    </linearGradient>
+    <linearGradient id="rift" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff8aa0"/>
+      <stop offset="100%" stop-color="#ff607a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g opacity="0.18">
+    <path d="M0 110h1200M0 210h1200M0 310h1200M0 410h1200M0 510h1200" stroke="#ffffff"/>
+    <path d="M160 0v630M360 0v630M560 0v630M760 0v630M960 0v630" stroke="#ffffff"/>
+  </g>
+  <g transform="translate(120 110)">
+    <text x="0" y="0" fill="#7cffb2" font-size="28" font-family="Arial, sans-serif" letter-spacing="8">GITHUB PAGES READY</text>
+    <text x="0" y="120" fill="#f5f7ff" font-size="96" font-weight="700" font-family="Arial, sans-serif">Flux Grid Arena</text>
+    <text x="0" y="182" fill="#9ea5be" font-size="32" font-family="Arial, sans-serif">A static web game with a local ranking board.</text>
+  </g>
+  <g transform="translate(760 130)">
+    <rect x="0" y="0" width="280" height="280" rx="28" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.08"/>
+    <rect x="24" y="24" width="68" height="68" rx="16" fill="url(#pulse)"/>
+    <rect x="106" y="24" width="68" height="68" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+    <rect x="188" y="24" width="68" height="68" rx="16" fill="url(#echo)"/>
+    <rect x="24" y="106" width="68" height="68" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+    <rect x="106" y="106" width="68" height="68" rx="16" fill="url(#rift)"/>
+    <rect x="188" y="106" width="68" height="68" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+    <rect x="24" y="188" width="68" height="68" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+    <rect x="106" y="188" width="68" height="68" rx="16" fill="url(#pulse)"/>
+    <rect x="188" y="188" width="68" height="68" rx="16" fill="#ffffff" fill-opacity="0.05"/>
+  </g>
+  <g transform="translate(120 420)">
+    <rect x="0" y="0" width="200" height="84" rx="20" fill="url(#pulse)"/>
+    <text x="44" y="52" fill="#091013" font-size="36" font-weight="700" font-family="Arial, sans-serif">PLAY</text>
+    <rect x="240" y="0" width="260" height="84" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.08"/>
+    <text x="274" y="35" fill="#9ea5be" font-size="22" font-family="Arial, sans-serif">Local Ranking</text>
+    <text x="274" y="62" fill="#f5f7ff" font-size="32" font-weight="700" font-family="Arial, sans-serif">1  ALEX  248</text>
+  </g>
+</svg>
