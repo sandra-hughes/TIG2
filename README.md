@@ -1,15 +1,17 @@
-﻿# Flux Grid Arena
+﻿[English](./README.md) | [简体中文](./README_cn.md) | [日本語](./README_jp.md)
 
-一个适合放到 GitHub 上的纯前端 Web 小游戏项目，直接支持 GitHub Pages 部署，内置本地排行榜。
+# Flux Grid Arena
 
-## 项目特点
+A GitHub-ready browser game built with plain HTML, CSS, and JavaScript. It runs as a fully static site, works well with GitHub Pages, and includes a local leaderboard.
 
-- 纯静态：只有 `HTML + CSS + JavaScript`，没有后端，部署成本低。
-- 有玩法：45 秒反应挑战，包含高分块、基础块、陷阱块。
-- 有排名：使用浏览器 `localStorage` 保存本地排行榜。
-- 仓库结构规范：包含 `README`、`LICENSE`、`.gitignore` 和 GitHub Pages 工作流。
+## Features
 
-## 目录结构
+- Static-first setup: no backend, no build step, and no deployment complexity.
+- Playable loop: a 45-second reaction challenge with score tiles, bonus tiles, and trap tiles.
+- Built-in ranking: uses browser `localStorage` to keep a local top 10 leaderboard.
+- Clean repository layout: includes `README`, `LICENSE`, `.gitignore`, and a GitHub Pages workflow.
+
+## Project Structure
 
 ```text
 .
@@ -25,46 +27,48 @@
 ├─ .nojekyll
 ├─ index.html
 ├─ LICENSE
-└─ README.md
+├─ README.md
+├─ README_cn.md
+└─ README_jp.md
 ```
 
-## 本地运行
+## Run Locally
 
-直接双击 `index.html` 就可以打开。
+You can open `index.html` directly in a browser.
 
-如果你想用本地静态服务器，也可以在项目目录运行：
+If you prefer a local static server:
 
 ```bash
 npx serve .
 ```
 
-## 发布到 GitHub
+## Deploy to GitHub
 
-1. 新建一个 GitHub 仓库，例如 `flux-grid-arena`。
-2. 把当前目录内容推到仓库根目录。
-3. 进入 GitHub 仓库的 `Settings > Pages`。
-4. 把部署来源设置为 `GitHub Actions`。
-5. 推送到 `main` 分支后，工作流会自动发布页面。
+1. Create a GitHub repository, for example `flux-grid-arena`.
+2. Push the contents of this folder to the repository root.
+3. Open `Settings > Pages` in the repository.
+4. Set the deployment source to `GitHub Actions`.
+5. Push to `main` and the workflow will publish the site automatically.
 
-## 排行榜说明
+## Leaderboard Notes
 
-- 当前版本是本地排行榜，只保存在当前浏览器里。
-- 这对 GitHub Pages 很友好，因为不需要数据库或服务端接口。
-- 如果你后面想升级成“全球排行榜”，建议接入 Supabase、Firebase 或 Cloudflare D1。
+- The current leaderboard is local-only and stored in the active browser.
+- This matches GitHub Pages well because it does not require a database or server API.
+- If you want a global leaderboard later, connect a service such as Supabase, Firebase, or Cloudflare D1.
 
-## 适合保活的原因
+## Why It Works Well As A Living Repository
 
-- 这是完整可展示的项目，不是单文件脚本。
-- 提交记录可以围绕玩法、UI、音效、全球榜、移动端优化持续迭代。
-- GitHub Pages 能直接展示效果，仓库可见度比单纯代码堆砌更高。
+- It is a complete, visible project instead of a throwaway script dump.
+- Commits can evolve naturally through gameplay tuning, UI changes, audio, mobile polish, or online features.
+- GitHub Pages makes the repository easy to preview and share.
 
-## 后续可继续加的内容
+## Good Next Iterations
 
-- 全局在线排行榜
-- 音效和背景音乐
-- 每日挑战模式
-- 触屏震动反馈
-- 多语言切换
+- Online leaderboard
+- Sound effects and music
+- Daily challenge mode
+- Mobile haptic feedback
+- More visual themes
 
 ## License
 

@@ -1,18 +1,20 @@
 ﻿<!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flux Grid Arena</title>
     <meta
+      id="meta-description"
       name="description"
-      content="一个适合部署到 GitHub Pages 的纯前端反应小游戏，内置本地排行榜。"
+      content="A GitHub Pages-ready reaction game with a local leaderboard."
     >
     <meta name="theme-color" content="#151321">
     <meta property="og:title" content="Flux Grid Arena">
     <meta
+      id="meta-og-description"
       property="og:description"
-      content="45 秒节奏反应挑战，支持本地排行榜，仓库结构适合直接放到 GitHub。"
+      content="A GitHub Pages-ready reaction game with a local leaderboard."
     >
     <meta property="og:type" content="website">
     <meta property="og:image" content="./assets/preview.svg">
@@ -20,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
       rel="stylesheet"
     >
     <link rel="stylesheet" href="./src/styles.css">
@@ -30,19 +32,26 @@
     <div class="page-shell">
       <header class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">GitHub Pages Ready</p>
+          <p class="eyebrow" data-i18n="eyebrow">GitHub Pages Ready</p>
           <h1>Flux Grid Arena</h1>
-          <p class="lead">
-            45 秒节奏反应小游戏。点亮的目标越快点中，连击越高，分数越高；点到裂隙或空格会直接掉分。
+          <p class="lead" data-i18n="lead">
+            A 45-second rhythm reaction game. Hit glowing targets fast to build your combo and score. Tap a rift or an empty cell and you lose points instantly.
           </p>
         </div>
         <div class="hero-panel panel">
-          <button id="start-button" class="primary-button" type="button">开始游戏</button>
-          <p id="status-text" class="status-text">点击开始，生成一局新的挑战。</p>
+          <div class="panel-topbar">
+            <div id="language-switcher" class="lang-switch" role="group" aria-label="Language switcher">
+              <button class="lang-button" type="button" data-lang="en">EN</button>
+              <button class="lang-button" type="button" data-lang="zh">中文</button>
+              <button class="lang-button" type="button" data-lang="ja">JP</button>
+            </div>
+          </div>
+          <button id="start-button" class="primary-button" type="button">Start Game</button>
+          <p id="status-text" class="status-text">Click start to generate a new run.</p>
           <div class="legend">
-            <span class="legend-chip pulse">Pulse + 分</span>
-            <span class="legend-chip echo">Echo 高分</span>
-            <span class="legend-chip rift">Rift 扣分</span>
+            <span class="legend-chip pulse" data-i18n="legendPulse">Pulse + score</span>
+            <span class="legend-chip echo" data-i18n="legendEcho">Echo bonus</span>
+            <span class="legend-chip rift" data-i18n="legendRift">Rift penalty</span>
           </div>
         </div>
       </header>
@@ -51,19 +60,19 @@
         <section class="panel game-panel">
           <div class="hud">
             <div class="stat-card">
-              <span class="stat-label">Score</span>
+              <span class="stat-label" data-i18n="scoreLabel">Score</span>
               <strong id="score-value">0</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label">Combo</span>
+              <span class="stat-label" data-i18n="comboLabel">Combo</span>
               <strong id="combo-value">0</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label">Accuracy</span>
+              <span class="stat-label" data-i18n="accuracyLabel">Accuracy</span>
               <strong id="accuracy-value">100%</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label">Time</span>
+              <span class="stat-label" data-i18n="timeLabel">Time</span>
               <strong id="time-value">45.0s</strong>
             </div>
           </div>
@@ -86,35 +95,35 @@
 
         <aside class="sidebar">
           <section class="panel">
-            <h2>玩法说明</h2>
+            <h2 data-i18n="rulesTitle">How To Play</h2>
             <ul class="rules">
-              <li><strong>Pulse</strong> 是基础得分块，反应越快加分越多。</li>
-              <li><strong>Echo</strong> 生存时间更短，但单次得分更高。</li>
-              <li><strong>Rift</strong> 是陷阱，点到会掉分并清空连击。</li>
-              <li>漏掉可得分目标也会打断节奏，影响命中率。</li>
+              <li data-i18n-html="rule1"><strong>Pulse</strong> is the standard score tile. Faster reactions grant more points.</li>
+              <li data-i18n-html="rule2"><strong>Echo</strong> expires faster but pays out more score per hit.</li>
+              <li data-i18n-html="rule3"><strong>Rift</strong> is a trap. Hitting it costs points and resets your combo.</li>
+              <li data-i18n-html="rule4">Missing a score tile also breaks rhythm and lowers your accuracy.</li>
             </ul>
           </section>
 
           <section class="panel ranking-panel">
             <div class="panel-head">
-              <h2>Ranking</h2>
-              <button id="clear-ranking" class="ghost-button" type="button">清空榜单</button>
+              <h2 data-i18n="rankingTitle">Ranking</h2>
+              <button id="clear-ranking" class="ghost-button" type="button" data-i18n="clearRanking">Clear Board</button>
             </div>
 
             <form id="save-form" class="save-form" hidden>
-              <label for="player-name">记录本地成绩</label>
+              <label for="player-name" data-i18n="saveLabel">Save your local run</label>
               <div class="save-row">
                 <input
                   id="player-name"
                   name="playerName"
                   type="text"
                   maxlength="12"
-                  placeholder="输入昵称"
+                  placeholder="Enter a name"
                   autocomplete="nickname"
                 >
-                <button id="save-button" class="primary-button" type="submit">保存</button>
+                <button id="save-button" class="primary-button" type="submit" data-i18n="saveButton">Save</button>
               </div>
-              <p id="save-hint" class="hint-text">排行榜保存在当前浏览器的 localStorage 中。</p>
+              <p id="save-hint" class="hint-text">Leaderboard data is stored in this browser via localStorage.</p>
             </form>
 
             <ol id="ranking-list" class="ranking-list"></ol>
@@ -122,8 +131,8 @@
         </aside>
       </main>
 
-      <footer class="footer-note">
-        纯静态项目，可直接部署到 GitHub Pages。当前排行榜为本地榜，同一浏览器下长期保留。
+      <footer class="footer-note" data-i18n="footerNote">
+        Static project, ready for GitHub Pages. The current ranking board is local to this browser.
       </footer>
     </div>
   </body>

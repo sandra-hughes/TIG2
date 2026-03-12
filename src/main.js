@@ -2,11 +2,167 @@
 const ROUND_DURATION_MS = 45_000;
 const LEADERBOARD_KEY = "flux-grid-arena-leaderboard";
 const PLAYER_NAME_KEY = "flux-grid-arena-player-name";
+const LANGUAGE_KEY = "flux-grid-arena-language";
+const DEFAULT_LANGUAGE = "en";
+const SUPPORTED_LANGUAGES = ["en", "zh", "ja"];
 
 const KIND_CONFIG = {
-  pulse: { label: "Pulse", baseScore: 14, ttl: 1_000, className: "is-pulse" },
-  echo: { label: "Echo", baseScore: 24, ttl: 700, className: "is-echo" },
-  rift: { label: "Rift", baseScore: -16, ttl: 950, className: "is-rift" },
+  pulse: { labelKey: "pulseName", baseScore: 14, ttl: 1_000, className: "is-pulse" },
+  echo: { labelKey: "echoName", baseScore: 24, ttl: 700, className: "is-echo" },
+  rift: { labelKey: "riftName", baseScore: -16, ttl: 950, className: "is-rift" },
+};
+
+const I18N = {
+  en: {
+    htmlLang: "en",
+    pageTitle: "Flux Grid Arena",
+    metaDescription: "A GitHub Pages-ready reaction game with a local leaderboard.",
+    eyebrow: "GitHub Pages Ready",
+    lead: "A 45-second rhythm reaction game. Hit glowing targets fast to build your combo and score. Tap a rift or an empty cell and you lose points instantly.",
+    pulseName: "Pulse",
+    echoName: "Echo",
+    riftName: "Rift",
+    startButtonIdle: "Start Game",
+    startButtonRestart: "Restart",
+    statusReady: "Click start to generate a new run.",
+    statusStarted: "Run started. Keep the rhythm and prioritize glowing targets.",
+    statusMissed: "You missed a score tile. Combo reset.",
+    statusMistake: "Empty tap. Rhythm broken.",
+    statusRift: "You hit a Rift. Score penalty and combo reset.",
+    statusHit: (label, combo) => `Hit ${label}. Combo ${combo}.`,
+    legendPulse: "Pulse + score",
+    legendEcho: "Echo bonus",
+    legendRift: "Rift penalty",
+    scoreLabel: "Score",
+    comboLabel: "Combo",
+    accuracyLabel: "Accuracy",
+    timeLabel: "Time",
+    arenaLabel: "Game arena",
+    cellLabel: "Cell",
+    rulesTitle: "How To Play",
+    rule1: "<strong>Pulse</strong> is the standard score tile. Faster reactions grant more points.",
+    rule2: "<strong>Echo</strong> expires faster but pays out more score per hit.",
+    rule3: "<strong>Rift</strong> is a trap. Hitting it costs points and resets your combo.",
+    rule4: "Missing a score tile also breaks rhythm and lowers your accuracy.",
+    rankingTitle: "Ranking",
+    clearRanking: "Clear Board",
+    saveLabel: "Save your local run",
+    namePlaceholder: "Enter a name",
+    saveButton: "Save",
+    saveHintDefault: "Leaderboard data is stored in this browser via localStorage.",
+    saveHintResult: (score, accuracy) => `Scored ${score} with ${formatAccuracy(accuracy)} accuracy. Save it to the local leaderboard.`,
+    endGameSave: (score) => `Round over. Score ${score}. You can save it to the local leaderboard.`,
+    endGameNoSave: (score) => `Round over. Score ${score}. It did not enter the current local top 10.`,
+    saveSuccess: (count) => `Score saved. ${count} local record${count === 1 ? "" : "s"} stored.`,
+    clearEmpty: "There is no local leaderboard to clear.",
+    clearConfirm: "Clear the local leaderboard stored in this browser?",
+    clearDone: "Local leaderboard cleared.",
+    noRanking: "No runs saved yet. Set the first score.",
+    rankingMeta: (accuracy, bestCombo, date) => `${formatAccuracy(accuracy)} · Combo ${bestCombo} · ${date}`,
+    recent: "recent",
+    footerNote: "Static project, ready for GitHub Pages. The current ranking board is local to this browser.",
+    dateLocale: "en-US",
+  },
+  zh: {
+    htmlLang: "zh-CN",
+    pageTitle: "Flux Grid Arena",
+    metaDescription: "一个适合 GitHub Pages 的反应小游戏，带本地排行榜。",
+    eyebrow: "GitHub Pages Ready",
+    lead: "45 秒节奏反应小游戏。点亮的目标越快点中，连击越高，分数越高；点到裂隙或空格会直接掉分。",
+    pulseName: "Pulse",
+    echoName: "Echo",
+    riftName: "Rift",
+    startButtonIdle: "开始游戏",
+    startButtonRestart: "重新开始",
+    statusReady: "点击开始，生成一局新的挑战。",
+    statusStarted: "挑战已开始，保持节奏，优先点击亮块。",
+    statusMissed: "漏掉了得分块，连击已中断。",
+    statusMistake: "空拍，节奏被打断。",
+    statusRift: "踩到 Rift，扣分并清空连击。",
+    statusHit: (label, combo) => `命中 ${label}，当前连击 ${combo}。`,
+    legendPulse: "Pulse + 分",
+    legendEcho: "Echo 高分",
+    legendRift: "Rift 扣分",
+    scoreLabel: "分数",
+    comboLabel: "连击",
+    accuracyLabel: "命中率",
+    timeLabel: "时间",
+    arenaLabel: "游戏区域",
+    cellLabel: "格子",
+    rulesTitle: "玩法说明",
+    rule1: "<strong>Pulse</strong> 是基础得分块，反应越快加分越多。",
+    rule2: "<strong>Echo</strong> 生存时间更短，但单次得分更高。",
+    rule3: "<strong>Rift</strong> 是陷阱，点到会掉分并清空连击。",
+    rule4: "漏掉可得分目标也会打断节奏，影响命中率。",
+    rankingTitle: "排行榜",
+    clearRanking: "清空榜单",
+    saveLabel: "记录本地成绩",
+    namePlaceholder: "输入昵称",
+    saveButton: "保存",
+    saveHintDefault: "排行榜保存在当前浏览器的 localStorage 中。",
+    saveHintResult: (score, accuracy) => `本局 ${score} 分，命中率 ${formatAccuracy(accuracy)}。可保存到本地排行榜。`,
+    endGameSave: (score) => `本局结束，得分 ${score}。可以写入本地排行榜。`,
+    endGameNoSave: (score) => `本局结束，得分 ${score}。未进入当前本地榜前 10。`,
+    saveSuccess: (count) => `成绩已保存，当前共有 ${count} 条本地记录。`,
+    clearEmpty: "当前没有可清空的本地榜单。",
+    clearConfirm: "清空当前浏览器里的本地排行榜？",
+    clearDone: "本地排行榜已清空。",
+    noRanking: "还没有记录，先打出第一局。",
+    rankingMeta: (accuracy, bestCombo, date) => `${formatAccuracy(accuracy)} · 连击 ${bestCombo} · ${date}`,
+    recent: "最近",
+    footerNote: "纯静态项目，可直接部署到 GitHub Pages。当前排行榜为本地榜，同一浏览器下长期保留。",
+    dateLocale: "zh-CN",
+  },
+  ja: {
+    htmlLang: "ja",
+    pageTitle: "Flux Grid Arena",
+    metaDescription: "GitHub Pages 向けの反応ゲーム。ローカルランキング付き。",
+    eyebrow: "GitHub Pages Ready",
+    lead: "45 秒のリズム反応ゲームです。光ったターゲットを素早く叩いてコンボとスコアを伸ばし、Rift や空のセルを押すと即座に減点されます。",
+    pulseName: "Pulse",
+    echoName: "Echo",
+    riftName: "Rift",
+    startButtonIdle: "ゲーム開始",
+    startButtonRestart: "再スタート",
+    statusReady: "開始ボタンを押すと新しいラウンドが始まります。",
+    statusStarted: "ラウンド開始。リズムを保って光るターゲットを優先してください。",
+    statusMissed: "得点タイルを逃しました。コンボがリセットされました。",
+    statusMistake: "空振りです。リズムが崩れました。",
+    statusRift: "Rift に触れました。減点され、コンボもリセットされました。",
+    statusHit: (label, combo) => `${label} をヒット。現在 ${combo} コンボ。`,
+    legendPulse: "Pulse + score",
+    legendEcho: "Echo bonus",
+    legendRift: "Rift penalty",
+    scoreLabel: "スコア",
+    comboLabel: "コンボ",
+    accuracyLabel: "精度",
+    timeLabel: "時間",
+    arenaLabel: "ゲームエリア",
+    cellLabel: "セル",
+    rulesTitle: "遊び方",
+    rule1: "<strong>Pulse</strong> は基本得点タイルです。反応が速いほど多く加点されます。",
+    rule2: "<strong>Echo</strong> は消えるのが速い代わりに、1 回の得点が高めです。",
+    rule3: "<strong>Rift</strong> はトラップです。触れると減点され、コンボがリセットされます。",
+    rule4: "得点タイルを逃してもリズムが崩れ、精度が下がります。",
+    rankingTitle: "ランキング",
+    clearRanking: "クリア",
+    saveLabel: "ローカル記録を保存",
+    namePlaceholder: "名前を入力",
+    saveButton: "保存",
+    saveHintDefault: "ランキングはこのブラウザの localStorage に保存されます。",
+    saveHintResult: (score, accuracy) => `今回のスコアは ${score}、精度は ${formatAccuracy(accuracy)} です。ローカルランキングに保存できます。`,
+    endGameSave: (score) => `ラウンド終了。スコア ${score}。ローカルランキングに保存できます。`,
+    endGameNoSave: (score) => `ラウンド終了。スコア ${score}。現在のローカル上位 10 位には入りませんでした。`,
+    saveSuccess: (count) => `スコアを保存しました。現在 ${count} 件のローカル記録があります。`,
+    clearEmpty: "削除できるローカルランキングがありません。",
+    clearConfirm: "このブラウザに保存されたローカルランキングを削除しますか?",
+    clearDone: "ローカルランキングを削除しました。",
+    noRanking: "まだ記録がありません。最初のスコアを出してください。",
+    rankingMeta: (accuracy, bestCombo, date) => `${formatAccuracy(accuracy)} · コンボ ${bestCombo} · ${date}`,
+    recent: "最近",
+    footerNote: "GitHub Pages にそのまま配備できる静的プロジェクトです。現在のランキングはこのブラウザ内だけで保持されます。",
+    dateLocale: "ja-JP",
+  },
 };
 
 const arena = document.querySelector("#arena");
@@ -22,12 +178,19 @@ const clearRankingButton = document.querySelector("#clear-ranking");
 const saveForm = document.querySelector("#save-form");
 const playerNameInput = document.querySelector("#player-name");
 const saveHint = document.querySelector("#save-hint");
+const langButtons = Array.from(document.querySelectorAll("[data-lang]"));
+const metaDescription = document.querySelector("#meta-description");
+const metaOgDescription = document.querySelector("#meta-og-description");
 
 let animationFrameId = 0;
 let pendingResult = null;
 let leaderboard = loadLeaderboard();
+let currentLanguage = loadLanguage();
+let statusState = { key: "statusReady", args: [] };
+let saveHintState = { key: "saveHintDefault", args: [] };
 let state = createInitialState();
 
+applyLanguage(currentLanguage);
 renderLeaderboard();
 renderArena(performance.now());
 updateHud(performance.now());
@@ -36,6 +199,7 @@ startButton.addEventListener("click", startGame);
 clearRankingButton.addEventListener("click", clearLeaderboard);
 saveForm.addEventListener("submit", handleSaveScore);
 arena.addEventListener("click", handleArenaClick);
+langButtons.forEach((button) => button.addEventListener("click", handleLanguageChange));
 
 window.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
@@ -76,8 +240,9 @@ function startGame() {
   pendingResult = null;
   saveForm.hidden = true;
   playerNameInput.value = localStorage.getItem(PLAYER_NAME_KEY) ?? "";
-  statusText.textContent = "挑战已开始，保持节奏，优先点击亮块。";
-  startButton.textContent = "重新开始";
+  setStatus("statusStarted");
+  setSaveHint("saveHintDefault");
+  updateStartButtonLabel();
 
   renderArena(now);
   updateHud(now);
@@ -166,7 +331,7 @@ function expireTiles(now) {
     if (tile.kind !== "rift") {
       state.combo = 0;
       state.misses += 1;
-      statusText.textContent = "漏掉了目标，连击已中断。";
+      setStatus("statusMissed");
       state.tiles[index] = inactiveTile("miss");
       scheduleFeedbackClear(index, "miss");
       return;
@@ -190,7 +355,7 @@ function handleArenaClick(event) {
     state.mistakes += 1;
     state.combo = 0;
     state.score = Math.max(0, state.score - 4);
-    statusText.textContent = "空拍，节奏被打断。";
+    setStatus("statusMistake");
     state.tiles[index] = inactiveTile("miss");
     scheduleFeedbackClear(index, "miss");
     updateHud(now);
@@ -202,7 +367,7 @@ function handleArenaClick(event) {
     state.mistakes += 1;
     state.combo = 0;
     state.score = Math.max(0, state.score + KIND_CONFIG.rift.baseScore);
-    statusText.textContent = "踩到 Rift，扣分并清空连击。";
+    setStatus("statusRift");
     state.tiles[index] = inactiveTile("miss");
     scheduleFeedbackClear(index, "miss");
     updateHud(now);
@@ -220,7 +385,7 @@ function handleArenaClick(event) {
   state.bestCombo = Math.max(state.bestCombo, state.combo);
   state.score += config.baseScore + speedBonus + comboBonus;
 
-  statusText.textContent = `命中 ${config.label}，当前连击 ${state.combo}。`;
+  setStatus("statusHit", t(config.labelKey), state.combo);
   state.tiles[index] = inactiveTile("hit");
   scheduleFeedbackClear(index, "hit");
   state.nextSpawnAt = Math.min(state.nextSpawnAt, now + 80);
@@ -269,16 +434,15 @@ function endGame() {
 
   if (canSave) {
     saveForm.hidden = false;
-    saveHint.textContent = `本局 ${result.score} 分，命中率 ${formatAccuracy(result.accuracy)}。可保存到本地排行榜。`;
+    setSaveHint("saveHintResult", result.score, result.accuracy);
     playerNameInput.focus();
   } else {
     saveForm.hidden = true;
+    setSaveHint("saveHintDefault");
   }
 
-  statusText.textContent = canSave
-    ? `本局结束，得分 ${result.score}。可以写入本地排行榜。`
-    : `本局结束，得分 ${result.score}。未进入当前本地榜前 10。`;
-
+  setStatus(canSave ? "endGameSave" : "endGameNoSave", result.score);
+  updateStartButtonLabel();
   updateHud(performance.now());
   renderArena(performance.now());
 }
@@ -311,8 +475,10 @@ function handleSaveScore(event) {
 
   pendingResult = null;
   saveForm.hidden = true;
+  setSaveHint("saveHintDefault");
   renderLeaderboard();
-  statusText.textContent = `成绩已保存，当前共有 ${leaderboard.length} 条本地记录。`;
+  setStatus("saveSuccess", leaderboard.length);
+  updateStartButtonLabel();
 }
 
 function sanitizeName(value) {
@@ -321,18 +487,18 @@ function sanitizeName(value) {
 
 function clearLeaderboard() {
   if (!leaderboard.length) {
-    statusText.textContent = "当前没有可清空的本地榜单。";
+    setStatus("clearEmpty");
     return;
   }
 
-  if (!window.confirm("清空当前浏览器里的本地排行榜？")) {
+  if (!window.confirm(t("clearConfirm"))) {
     return;
   }
 
   leaderboard = [];
   localStorage.removeItem(LEADERBOARD_KEY);
   renderLeaderboard();
-  statusText.textContent = "本地排行榜已清空。";
+  setStatus("clearDone");
 }
 
 function loadLeaderboard() {
@@ -368,7 +534,7 @@ function loadLeaderboard() {
 
 function renderLeaderboard() {
   if (!leaderboard.length) {
-    rankingList.innerHTML = '<li class="rank-empty">还没有记录，先打出第一局。</li>';
+    rankingList.innerHTML = `<li class="rank-empty">${escapeHtml(t("noRanking"))}</li>`;
     return;
   }
 
@@ -380,7 +546,7 @@ function renderLeaderboard() {
           <span class="rank-index">${index + 1}</span>
           <div class="rank-meta">
             <strong>${escapeHtml(entry.name)}</strong>
-            <span>${formatAccuracy(entry.accuracy)} · Combo ${entry.bestCombo} · ${dateLabel}</span>
+            <span>${escapeHtml(resolveMessage("rankingMeta", entry.accuracy, entry.bestCombo, dateLabel))}</span>
           </div>
           <span class="rank-score">${entry.score}</span>
         </li>
@@ -396,6 +562,7 @@ function renderArena(now) {
 
     element.className = "cell";
     element.style.setProperty("--life", "0");
+    element.setAttribute("aria-label", `${t("cellLabel")} ${index + 1}`);
     span.textContent = "";
 
     if (tile.feedback === "hit") {
@@ -415,7 +582,7 @@ function renderArena(now) {
 
     element.classList.add("is-active", config.className);
     element.style.setProperty("--life", String(life));
-    span.textContent = config.label;
+    span.textContent = t(config.labelKey);
   });
 }
 
@@ -446,18 +613,97 @@ function formatAccuracy(value) {
 
 function formatDate(value) {
   if (!value) {
-    return "recent";
+    return t("recent");
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "recent";
+    return t("recent");
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat(I18N[currentLanguage].dateLocale, {
     month: "short",
     day: "numeric",
   }).format(date);
+}
+
+function handleLanguageChange(event) {
+  const language = event.currentTarget.dataset.lang;
+  if (!SUPPORTED_LANGUAGES.includes(language) || language === currentLanguage) {
+    return;
+  }
+
+  currentLanguage = language;
+  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+  applyLanguage(currentLanguage);
+}
+
+function applyLanguage(language) {
+  const copy = I18N[language];
+
+  document.documentElement.lang = copy.htmlLang;
+  document.title = copy.pageTitle;
+  metaDescription.setAttribute("content", copy.metaDescription);
+  metaOgDescription.setAttribute("content", copy.metaDescription);
+  arena.setAttribute("aria-label", copy.arenaLabel);
+  playerNameInput.setAttribute("placeholder", copy.namePlaceholder);
+
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  document.querySelectorAll("[data-i18n-html]").forEach((element) => {
+    element.innerHTML = t(element.dataset.i18nHtml);
+  });
+
+  langButtons.forEach((button) => {
+    const isActive = button.dataset.lang === currentLanguage;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  updateStartButtonLabel();
+  renderStatus();
+  renderSaveHint();
+  renderLeaderboard();
+  renderArena(performance.now());
+  updateHud(performance.now());
+}
+
+function updateStartButtonLabel() {
+  startButton.textContent = state.running || pendingResult ? t("startButtonRestart") : t("startButtonIdle");
+}
+
+function setStatus(key, ...args) {
+  statusState = { key, args };
+  renderStatus();
+}
+
+function renderStatus() {
+  statusText.textContent = resolveMessage(statusState.key, ...statusState.args);
+}
+
+function setSaveHint(key, ...args) {
+  saveHintState = { key, args };
+  renderSaveHint();
+}
+
+function renderSaveHint() {
+  saveHint.textContent = resolveMessage(saveHintState.key, ...saveHintState.args);
+}
+
+function resolveMessage(key, ...args) {
+  const value = I18N[currentLanguage][key];
+  return typeof value === "function" ? value(...args) : value;
+}
+
+function t(key) {
+  return resolveMessage(key);
+}
+
+function loadLanguage() {
+  const stored = localStorage.getItem(LANGUAGE_KEY);
+  return SUPPORTED_LANGUAGES.includes(stored) ? stored : DEFAULT_LANGUAGE;
 }
 
 function escapeHtml(value) {
