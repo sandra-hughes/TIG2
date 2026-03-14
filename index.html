@@ -3,18 +3,18 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flux Grid Arena</title>
+    <title>Flux Grid Arcade</title>
     <meta
       id="meta-description"
       name="description"
-      content="A GitHub Pages-ready reaction game with a local leaderboard."
+      content="A GitHub Pages-ready mini arcade with multiple local leaderboards."
     >
     <meta name="theme-color" content="#151321">
-    <meta property="og:title" content="Flux Grid Arena">
+    <meta property="og:title" content="Flux Grid Arcade">
     <meta
       id="meta-og-description"
       property="og:description"
-      content="A GitHub Pages-ready reaction game with a local leaderboard."
+      content="A GitHub Pages-ready mini arcade with multiple local leaderboards."
     >
     <meta property="og:type" content="website">
     <meta property="og:image" content="./assets/preview.svg">
@@ -33,9 +33,9 @@
       <header class="hero">
         <div class="hero-copy">
           <p class="eyebrow" data-i18n="eyebrow">GitHub Pages Ready</p>
-          <h1>Flux Grid Arena</h1>
+          <h1 data-i18n="hubTitle">Flux Grid Arcade</h1>
           <p class="lead" data-i18n="lead">
-            A 45-second rhythm reaction game. Hit glowing targets fast to build your combo and score. Tap a rift or an empty cell and you lose points instantly.
+            A compact browser arcade with local leaderboards. Jump between a speed-focused reaction challenge and a tactical board duel.
           </p>
         </div>
         <div class="hero-panel panel">
@@ -46,72 +46,117 @@
               <button class="lang-button" type="button" data-lang="ja">JP</button>
             </div>
           </div>
-          <button id="start-button" class="primary-button" type="button">Start Game</button>
-          <p id="status-text" class="status-text">Click start to generate a new run.</p>
-          <div class="legend">
-            <span class="legend-chip pulse" data-i18n="legendPulse">Pulse + score</span>
-            <span class="legend-chip echo" data-i18n="legendEcho">Echo bonus</span>
-            <span class="legend-chip rift" data-i18n="legendRift">Rift penalty</span>
+          <button id="start-button" class="primary-button" type="button">Start Run</button>
+          <p id="status-text" class="status-text">Choose a game and start a run.</p>
+          <div class="legend" id="game-tags">
+            <span id="game-tag-1" class="legend-chip pulse">45s sprint</span>
+            <span id="game-tag-2" class="legend-chip echo">Combo scaling</span>
+            <span id="game-tag-3" class="legend-chip rift">Trap tiles</span>
           </div>
         </div>
       </header>
 
       <main class="layout">
+        <aside class="panel game-library">
+          <div class="panel-head panel-head-stack">
+            <h2 data-i18n="gamesTitle">Game Library</h2>
+            <p class="panel-intro" data-i18n="gamesIntro">
+              Switch between ranked mini-games without leaving the page.
+            </p>
+          </div>
+          <div class="game-menu">
+            <button class="game-choice" type="button" data-game="reaction">
+              <span class="game-choice-index"></span>
+              <strong class="game-choice-title"></strong>
+              <span class="game-choice-desc"></span>
+            </button>
+            <button class="game-choice" type="button" data-game="ttt">
+              <span class="game-choice-index"></span>
+              <strong class="game-choice-title"></strong>
+              <span class="game-choice-desc"></span>
+            </button>
+          </div>
+        </aside>
+
         <section class="panel game-panel">
-          <div class="hud">
+          <div class="game-heading">
+            <p id="game-badge" class="game-badge">Game 01</p>
+            <h2 id="game-title">Pulse Grid</h2>
+            <p id="game-description" class="game-description">
+              Clear glowing tiles fast, avoid traps, and push for the cleanest score run.
+            </p>
+          </div>
+
+          <div class="hud" id="hud">
             <div class="stat-card">
-              <span class="stat-label" data-i18n="scoreLabel">Score</span>
-              <strong id="score-value">0</strong>
+              <span id="stat-label-1" class="stat-label">Score</span>
+              <strong id="stat-value-1">0</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label" data-i18n="comboLabel">Combo</span>
-              <strong id="combo-value">0</strong>
+              <span id="stat-label-2" class="stat-label">Combo</span>
+              <strong id="stat-value-2">0</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label" data-i18n="accuracyLabel">Accuracy</span>
-              <strong id="accuracy-value">100%</strong>
+              <span id="stat-label-3" class="stat-label">Accuracy</span>
+              <strong id="stat-value-3">100%</strong>
             </div>
             <div class="stat-card">
-              <span class="stat-label" data-i18n="timeLabel">Time</span>
-              <strong id="time-value">45.0s</strong>
+              <span id="stat-label-4" class="stat-label">Time</span>
+              <strong id="stat-value-4">45.0s</strong>
             </div>
           </div>
 
-          <div id="arena" class="arena" role="grid" aria-label="Game arena">
-            <button class="cell" type="button" data-cell="0" aria-label="Cell 1"></button>
-            <button class="cell" type="button" data-cell="1" aria-label="Cell 2"></button>
-            <button class="cell" type="button" data-cell="2" aria-label="Cell 3"></button>
-            <button class="cell" type="button" data-cell="3" aria-label="Cell 4"></button>
-            <button class="cell" type="button" data-cell="4" aria-label="Cell 5"></button>
-            <button class="cell" type="button" data-cell="5" aria-label="Cell 6"></button>
-            <button class="cell" type="button" data-cell="6" aria-label="Cell 7"></button>
-            <button class="cell" type="button" data-cell="7" aria-label="Cell 8"></button>
-            <button class="cell" type="button" data-cell="8" aria-label="Cell 9"></button>
-            <button class="cell" type="button" data-cell="9" aria-label="Cell 10"></button>
-            <button class="cell" type="button" data-cell="10" aria-label="Cell 11"></button>
-            <button class="cell" type="button" data-cell="11" aria-label="Cell 12"></button>
+          <div id="reaction-view" class="game-view">
+            <div id="arena" class="arena" role="grid" aria-label="Game arena">
+              <button class="cell" type="button" data-cell="0" aria-label="Cell 1"></button>
+              <button class="cell" type="button" data-cell="1" aria-label="Cell 2"></button>
+              <button class="cell" type="button" data-cell="2" aria-label="Cell 3"></button>
+              <button class="cell" type="button" data-cell="3" aria-label="Cell 4"></button>
+              <button class="cell" type="button" data-cell="4" aria-label="Cell 5"></button>
+              <button class="cell" type="button" data-cell="5" aria-label="Cell 6"></button>
+              <button class="cell" type="button" data-cell="6" aria-label="Cell 7"></button>
+              <button class="cell" type="button" data-cell="7" aria-label="Cell 8"></button>
+              <button class="cell" type="button" data-cell="8" aria-label="Cell 9"></button>
+              <button class="cell" type="button" data-cell="9" aria-label="Cell 10"></button>
+              <button class="cell" type="button" data-cell="10" aria-label="Cell 11"></button>
+              <button class="cell" type="button" data-cell="11" aria-label="Cell 12"></button>
+            </div>
+          </div>
+
+          <div id="ttt-view" class="game-view" hidden>
+            <div class="ttt-shell">
+              <div id="ttt-board" class="ttt-board" role="grid" aria-label="Tic-Tac-Toe board">
+                <button class="ttt-cell" type="button" data-ttt-cell="0" aria-label="Tic-Tac-Toe cell 1"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="1" aria-label="Tic-Tac-Toe cell 2"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="2" aria-label="Tic-Tac-Toe cell 3"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="3" aria-label="Tic-Tac-Toe cell 4"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="4" aria-label="Tic-Tac-Toe cell 5"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="5" aria-label="Tic-Tac-Toe cell 6"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="6" aria-label="Tic-Tac-Toe cell 7"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="7" aria-label="Tic-Tac-Toe cell 8"></button>
+                <button class="ttt-cell" type="button" data-ttt-cell="8" aria-label="Tic-Tac-Toe cell 9"></button>
+              </div>
+            </div>
           </div>
         </section>
 
         <aside class="sidebar">
           <section class="panel">
             <h2 data-i18n="rulesTitle">How To Play</h2>
-            <ul class="rules">
-              <li data-i18n-html="rule1"><strong>Pulse</strong> is the standard score tile. Faster reactions grant more points.</li>
-              <li data-i18n-html="rule2"><strong>Echo</strong> expires faster but pays out more score per hit.</li>
-              <li data-i18n-html="rule3"><strong>Rift</strong> is a trap. Hitting it costs points and resets your combo.</li>
-              <li data-i18n-html="rule4">Missing a score tile also breaks rhythm and lowers your accuracy.</li>
-            </ul>
+            <ul id="rules-list" class="rules"></ul>
           </section>
 
           <section class="panel ranking-panel">
             <div class="panel-head">
-              <h2 data-i18n="rankingTitle">Ranking</h2>
+              <div>
+                <h2 data-i18n="rankingTitle">Ranking</h2>
+                <p id="ranking-context" class="panel-intro">Pulse Grid local top 10</p>
+              </div>
               <button id="clear-ranking" class="ghost-button" type="button" data-i18n="clearRanking">Clear Board</button>
             </div>
 
             <form id="save-form" class="save-form" hidden>
-              <label for="player-name" data-i18n="saveLabel">Save your local run</label>
+              <label id="save-label" for="player-name">Save your local run</label>
               <div class="save-row">
                 <input
                   id="player-name"
@@ -132,7 +177,7 @@
       </main>
 
       <footer class="footer-note" data-i18n="footerNote">
-        Static project, ready for GitHub Pages. The current ranking board is local to this browser.
+        Static arcade project, ready for GitHub Pages. Each game stores its own local leaderboard in this browser.
       </footer>
     </div>
   </body>
