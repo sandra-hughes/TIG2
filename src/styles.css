@@ -517,10 +517,12 @@ input:focus-visible {
 }
 
 .sudoku-board {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 4px;
-  padding: 14px;
+  gap: 8px;
+  padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
   background:
@@ -532,9 +534,49 @@ input:focus-visible {
   width: min(100%, 640px);
 }
 
+.sudoku-board::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(
+      to right,
+      transparent calc(33.333% - 5px),
+      rgba(124, 255, 178, 0.34) calc(33.333% - 5px),
+      rgba(124, 255, 178, 0.34) calc(33.333% + 5px),
+      transparent calc(33.333% + 5px)
+    ),
+    linear-gradient(
+      to right,
+      transparent calc(66.666% - 5px),
+      rgba(124, 255, 178, 0.34) calc(66.666% - 5px),
+      rgba(124, 255, 178, 0.34) calc(66.666% + 5px),
+      transparent calc(66.666% + 5px)
+    ),
+    linear-gradient(
+      to bottom,
+      transparent calc(33.333% - 5px),
+      rgba(124, 255, 178, 0.34) calc(33.333% - 5px),
+      rgba(124, 255, 178, 0.34) calc(33.333% + 5px),
+      transparent calc(33.333% + 5px)
+    ),
+    linear-gradient(
+      to bottom,
+      transparent calc(66.666% - 5px),
+      rgba(124, 255, 178, 0.34) calc(66.666% - 5px),
+      rgba(124, 255, 178, 0.34) calc(66.666% + 5px),
+      transparent calc(66.666% + 5px)
+    );
+}
+
 .sudoku-cell {
   appearance: none;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   aspect-ratio: 1;
@@ -597,16 +639,6 @@ input:focus-visible {
   font-size: clamp(0.56rem, 1.15vw, 0.8rem);
   font-weight: 600;
   line-height: 1;
-}
-
-.sudoku-cell.is-block-right {
-  border-right-width: 4px;
-  border-right-color: rgba(124, 255, 178, 0.34);
-}
-
-.sudoku-cell.is-block-bottom {
-  border-bottom-width: 4px;
-  border-bottom-color: rgba(124, 255, 178, 0.34);
 }
 
 .sudoku-keypad {
