@@ -11,9 +11,39 @@ const WIN_LINES = [
   [2, 4, 6],
 ];
 
+const SUDOKU_DIFFICULTIES = ["easy", "medium", "hard", "expert"];
+const SUDOKU_SOLUTION = "534678912672195348198342567859761423426853791713924856961537284287419635345286179";
+const SUDOKU_PUZZLES = {
+  easy: [
+    {
+      puzzle: "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+      solution: SUDOKU_SOLUTION,
+    },
+  ],
+  medium: [
+    {
+      puzzle: "530070000600105000000342560859000420426053791013920056961500284080419605345080170",
+      solution: SUDOKU_SOLUTION,
+    },
+  ],
+  hard: [
+    {
+      puzzle: "030000900600105000008002067800060003020800001700004800001030080080019005300006070",
+      solution: SUDOKU_SOLUTION,
+    },
+  ],
+  expert: [
+    {
+      puzzle: "000008900070100000000000060800000003020000001000004800001000000000019005300000000",
+      solution: SUDOKU_SOLUTION,
+    },
+  ],
+};
+
 const STORAGE_KEYS = {
   reactionLeaderboard: "flux-grid-arena-leaderboard",
   tttLeaderboard: "flux-grid-arcade-ttt-leaderboard",
+  sudokuLeaderboard: "flux-grid-arcade-sudoku-leaderboard",
   playerName: "flux-grid-arena-player-name",
   language: "flux-grid-arena-language",
   activeGame: "flux-grid-arcade-active-game",
@@ -22,7 +52,7 @@ const STORAGE_KEYS = {
 const DEFAULT_LANGUAGE = "en";
 const DEFAULT_GAME = "reaction";
 const SUPPORTED_LANGUAGES = ["en", "zh", "ja"];
-const SUPPORTED_GAMES = ["reaction", "ttt"];
+const SUPPORTED_GAMES = ["reaction", "ttt", "sudoku"];
 
 const KIND_CONFIG = {
   pulse: { labelKey: "pulseName", baseScore: 14, ttl: 1_000, className: "is-pulse" },
@@ -37,7 +67,7 @@ const I18N = {
     metaDescription: "A GitHub Pages-ready mini arcade with multiple local leaderboards.",
     eyebrow: "GitHub Pages Ready",
     hubTitle: "Flux Grid Arcade",
-    lead: "A compact browser arcade with local leaderboards. Jump between a speed-focused reaction challenge and a tactical board duel.",
+    lead: "A compact browser arcade with local leaderboards. Jump between a speed-focused reaction challenge, a tactical board duel, and a multi-difficulty Sudoku run.",
     gamesTitle: "Game Library",
     gamesIntro: "Switch between ranked mini-games without leaving the page.",
     rulesTitle: "How To Play",
@@ -54,6 +84,7 @@ const I18N = {
     recent: "recent",
     cellLabel: "Cell",
     tttCellLabel: "Tic-Tac-Toe cell",
+    sudokuCellLabel: "Sudoku cell",
     games: {
       reaction: {
         indexLabel: "Game 01",
@@ -128,6 +159,46 @@ const I18N = {
           "Use reset to start a fresh board whenever the current match is over.",
         ],
       },
+      sudoku: {
+        indexLabel: "Game 03",
+        badgeLabel: "Game 03",
+        name: "Sudoku",
+        nav: "4 difficulties, digit highlight",
+        description: "Solve a classic 9x9 grid across four difficulty levels. Click a digit to highlight every matching number already placed on the board.",
+        rankingContext: (difficultyLabel) => `Sudoku ${difficultyLabel} local top 10`,
+        startIdle: "New Puzzle",
+        startRestart: "Restart Puzzle",
+        saveLabel: "Save your Sudoku result",
+        saveHintDefault: (difficultyLabel) => `${difficultyLabel} Sudoku records are stored in this browser via localStorage.`,
+        saveHintResult: (difficultyLabel, time, mistakes) => `Solved ${difficultyLabel} in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. Save it to the leaderboard.`,
+        statusReady: (difficultyLabel) => `Choose a ${difficultyLabel} Sudoku puzzle and start solving.`,
+        statusStarted: (difficultyLabel) => `${difficultyLabel} puzzle ready. Click a digit to highlight matching numbers, then fill the grid.`,
+        statusMistake: (value, mistakes) => `${value} does not fit there. Mistakes ${mistakes}.`,
+        statusSolvedSave: (time, mistakes) => `Puzzle solved in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. This run can be saved.`,
+        statusSolvedNoSave: (time, mistakes) => `Puzzle solved in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. It did not enter the current top 10.`,
+        saveSuccess: (count) => `Sudoku result saved. ${count} local record${count === 1 ? "" : "s"} stored for this difficulty.`,
+        clearEmpty: "There is no Sudoku leaderboard to clear for this difficulty.",
+        clearConfirm: (difficultyLabel) => `Clear the ${difficultyLabel} Sudoku leaderboard stored in this browser?`,
+        clearDone: "Sudoku leaderboard cleared for the current difficulty.",
+        noRanking: (difficultyLabel) => `No ${difficultyLabel} Sudoku runs saved yet.`,
+        rankingMeta: (mistakes, date) => `${mistakes} mistake${mistakes === 1 ? "" : "s"} · ${date}`,
+        hudLabels: ["Difficulty", "Filled", "Mistakes", "Time"],
+        tags: ["4 difficulties", "Digit highlight", "Local ranking"],
+        rules: [
+          "Choose between Easy, Medium, Hard, and Expert before starting a puzzle.",
+          "Click a digit such as <strong>2</strong> on the keypad to highlight every matching number already filled on the grid.",
+          "Only editable cells can be changed. Wrong entries do not stay on the board and increase your mistake count.",
+          "Rankings are stored separately for each difficulty and sorted by fastest clear time.",
+        ],
+        difficultyOptions: {
+          easy: "Easy",
+          medium: "Medium",
+          hard: "Hard",
+          expert: "Expert",
+        },
+        subtitle: "Click a digit to highlight every matching number already placed on the board.",
+        eraseLabel: "Erase",
+      },
     },
   },
   zh: {
@@ -136,7 +207,7 @@ const I18N = {
     metaDescription: "一个适合 GitHub Pages 的多游戏静态街机站点，内置多个本地排行榜。",
     eyebrow: "GitHub Pages Ready",
     hubTitle: "Flux Grid Arcade",
-    lead: "一个带本地排行榜的轻量浏览器街机页。你可以在快节奏反应挑战和策略型井字棋之间切换。",
+    lead: "一个带本地排行榜的轻量浏览器街机页。你可以在快节奏反应挑战、策略型井字棋和多难度数独之间切换。",
     gamesTitle: "游戏库",
     gamesIntro: "不离开页面就可以切换不同的排行榜小游戏。",
     rulesTitle: "玩法说明",
@@ -153,6 +224,7 @@ const I18N = {
     recent: "最近",
     cellLabel: "格子",
     tttCellLabel: "井字棋格",
+    sudokuCellLabel: "数独格",
     games: {
       reaction: {
         indexLabel: "游戏 01",
@@ -227,6 +299,46 @@ const I18N = {
           "当前对局结束后可以直接重开一盘。",
         ],
       },
+      sudoku: {
+        indexLabel: "游戏 03",
+        badgeLabel: "游戏 03",
+        name: "数独",
+        nav: "4 个难度，数字联动高亮",
+        description: "在 9x9 经典数独盘面中选择四档难度。点击某个数字，会高亮棋盘中所有已填入的相同数字。",
+        rankingContext: (difficultyLabel) => `数独 ${difficultyLabel} 本地前 10`,
+        startIdle: "新题目",
+        startRestart: "重新开题",
+        saveLabel: "保存数独结果",
+        saveHintDefault: (difficultyLabel) => `${difficultyLabel} 数独成绩会保存在当前浏览器的 localStorage 中。`,
+        saveHintResult: (difficultyLabel, time, mistakes) => `${difficultyLabel} 难度完成用时 ${time}，失误 ${mistakes} 次。可保存到本地排行榜。`,
+        statusReady: (difficultyLabel) => `选择 ${difficultyLabel} 难度后开始解题。`,
+        statusStarted: (difficultyLabel) => `${difficultyLabel} 题目已载入。点击数字可高亮全盘相同数字，再填入空格。`,
+        statusMistake: (value, mistakes) => `${value} 不能填在这里。当前失误 ${mistakes} 次。`,
+        statusSolvedSave: (time, mistakes) => `已完成本题，用时 ${time}，失误 ${mistakes} 次。本局可以保存。`,
+        statusSolvedNoSave: (time, mistakes) => `已完成本题，用时 ${time}，失误 ${mistakes} 次，但未进入当前前 10。`,
+        saveSuccess: (count) => `数独成绩已保存，该难度当前共有 ${count} 条本地记录。`,
+        clearEmpty: "当前难度下没有可清空的数独榜单。",
+        clearConfirm: (difficultyLabel) => `清空当前浏览器里的 ${difficultyLabel} 数独本地排行榜？`,
+        clearDone: "当前难度的数独排行榜已清空。",
+        noRanking: (difficultyLabel) => `还没有 ${difficultyLabel} 数独记录。`,
+        rankingMeta: (mistakes, date) => `失误 ${mistakes} 次 · ${date}`,
+        hudLabels: ["难度", "已填", "失误", "时间"],
+        tags: ["4 个难度", "数字高亮", "独立榜单"],
+        rules: [
+          "开始前可选择简单、中等、困难、专家四个难度。",
+          "点击数字键，例如 <strong>2</strong>，会高亮棋盘上所有已经填入的 2。",
+          "只有可编辑空格能被修改。错误输入不会保留在棋盘上，但会增加失误次数。",
+          "排行榜按难度分别保存，并按最短完成时间排序。",
+        ],
+        difficultyOptions: {
+          easy: "简单",
+          medium: "中等",
+          hard: "困难",
+          expert: "专家",
+        },
+        subtitle: "点击数字即可高亮棋盘中所有已出现的相同数字。",
+        eraseLabel: "清除",
+      },
     },
   },
   ja: {
@@ -235,7 +347,7 @@ const I18N = {
     metaDescription: "GitHub Pages 向けのマルチゲーム静的アーケード。各ゲームにローカルランキングがあります。",
     eyebrow: "GitHub Pages Ready",
     hubTitle: "Flux Grid Arcade",
-    lead: "ローカルランキング付きの軽量ブラウザアーケードです。高速な反応ゲームと戦略型の三目並べを切り替えて遊べます。",
+    lead: "ローカルランキング付きの軽量ブラウザアーケードです。高速な反応ゲーム、戦略型の三目並べ、4 段階難易度の数独を切り替えて遊べます。",
     gamesTitle: "ゲーム一覧",
     gamesIntro: "ページを離れずにランキング対応のミニゲームを切り替えられます。",
     rulesTitle: "遊び方",
@@ -252,6 +364,7 @@ const I18N = {
     recent: "最近",
     cellLabel: "セル",
     tttCellLabel: "三目並べセル",
+    sudokuCellLabel: "数独セル",
     games: {
       reaction: {
         indexLabel: "Game 01",
@@ -326,6 +439,46 @@ const I18N = {
           "対局終了後はそのまま新しい盤面を始められます。",
         ],
       },
+      sudoku: {
+        indexLabel: "Game 03",
+        badgeLabel: "Game 03",
+        name: "Sudoku",
+        nav: "4 難易度、数字ハイライト",
+        description: "4 段階の難易度で 9x9 の数独を解きます。数字をクリックすると、盤面上の同じ数字がすべて強調表示されます。",
+        rankingContext: (difficultyLabel) => `Sudoku ${difficultyLabel} ローカル Top 10`,
+        startIdle: "新しい問題",
+        startRestart: "問題をやり直す",
+        saveLabel: "Sudoku の結果を保存",
+        saveHintDefault: (difficultyLabel) => `${difficultyLabel} の Sudoku 記録はこのブラウザの localStorage に保存されます。`,
+        saveHintResult: (difficultyLabel, time, mistakes) => `${difficultyLabel} を ${time} でクリアし、ミスは ${mistakes} 回でした。ローカルランキングに保存できます。`,
+        statusReady: (difficultyLabel) => `${difficultyLabel} の Sudoku を選んで開始してください。`,
+        statusStarted: (difficultyLabel) => `${difficultyLabel} の問題を読み込みました。数字をクリックして同じ数字を強調表示し、空欄を埋めてください。`,
+        statusMistake: (value, mistakes) => `${value} はそこに入りません。ミスは ${mistakes} 回です。`,
+        statusSolvedSave: (time, mistakes) => `${time} でクリア、ミス ${mistakes} 回。この結果は保存できます。`,
+        statusSolvedNoSave: (time, mistakes) => `${time} でクリア、ミス ${mistakes} 回。ただし現在の Top 10 には入りませんでした。`,
+        saveSuccess: (count) => `Sudoku の結果を保存しました。この難易度には現在 ${count} 件のローカル記録があります。`,
+        clearEmpty: "この難易度で削除できる Sudoku ランキングはありません。",
+        clearConfirm: (difficultyLabel) => `このブラウザに保存された ${difficultyLabel} の Sudoku ランキングを削除しますか?`,
+        clearDone: "現在の難易度の Sudoku ランキングを削除しました。",
+        noRanking: (difficultyLabel) => `${difficultyLabel} の Sudoku 記録はまだありません。`,
+        rankingMeta: (mistakes, date) => `ミス ${mistakes} 回 · ${date}`,
+        hudLabels: ["難易度", "入力数", "ミス", "時間"],
+        tags: ["4 難易度", "数字ハイライト", "難易度別ランキング"],
+        rules: [
+          "Easy、Medium、Hard、Expert の 4 段階から難易度を選べます。",
+          "数字キー、たとえば <strong>2</strong> をクリックすると、盤面に入力済みの 2 がすべてハイライトされます。",
+          "編集できるのは空欄だけです。誤入力は盤面に残りませんが、ミス数は増えます。",
+          "ランキングは難易度ごとに分かれており、最短クリア時間順で並びます。",
+        ],
+        difficultyOptions: {
+          easy: "Easy",
+          medium: "Medium",
+          hard: "Hard",
+          expert: "Expert",
+        },
+        subtitle: "数字をクリックすると、盤面上の同じ数字がすべて強調表示されます。",
+        eraseLabel: "消去",
+      },
     },
   },
 };
@@ -333,7 +486,13 @@ const I18N = {
 const arena = document.querySelector("#arena");
 const reactionCells = Array.from(document.querySelectorAll("[data-cell]"));
 const tttBoard = document.querySelector("#ttt-board");
+const sudokuBoard = document.querySelector("#sudoku-board");
+const sudokuKeypad = document.querySelector("#sudoku-keypad");
+initializeSudokuUi();
 const tttCells = Array.from(document.querySelectorAll("[data-ttt-cell]"));
+const sudokuCells = Array.from(document.querySelectorAll("[data-sudoku-cell]"));
+const sudokuKeys = Array.from(document.querySelectorAll("[data-sudoku-value]"));
+const sudokuDifficultyButtons = Array.from(document.querySelectorAll("[data-sudoku-difficulty]"));
 const startButton = document.querySelector("#start-button");
 const statusText = document.querySelector("#status-text");
 const saveForm = document.querySelector("#save-form");
@@ -346,6 +505,8 @@ const rankingContext = document.querySelector("#ranking-context");
 const rulesList = document.querySelector("#rules-list");
 const reactionView = document.querySelector("#reaction-view");
 const tttView = document.querySelector("#ttt-view");
+const sudokuView = document.querySelector("#sudoku-view");
+const sudokuSubtitle = document.querySelector("#sudoku-subtitle");
 const statLabels = [1, 2, 3, 4].map((index) => document.querySelector(`#stat-label-${index}`));
 const statValues = [1, 2, 3, 4].map((index) => document.querySelector(`#stat-value-${index}`));
 const gameBadge = document.querySelector("#game-badge");
@@ -362,12 +523,16 @@ let currentLanguage = loadLanguage();
 let leaderboards = {
   reaction: loadReactionLeaderboard(),
   ttt: loadTttLeaderboard(),
+  sudoku: loadSudokuLeaderboard(),
 };
 let animationFrameId = 0;
 let reactionState = createReactionState();
 let tttState = createTttState();
+let sudokuState = createSudokuState();
 
 playerNameInput.value = localStorage.getItem(STORAGE_KEYS.playerName) ?? "";
+setGameStatus("sudoku", "statusReady", getSudokuDifficultyLabel());
+setGameSaveHint("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
 
 applyLanguage(currentLanguage);
 renderActiveGame();
@@ -377,6 +542,9 @@ clearRankingButton.addEventListener("click", handleClearLeaderboard);
 saveForm.addEventListener("submit", handleSaveScore);
 arena.addEventListener("click", handleReactionClick);
 tttBoard.addEventListener("click", handleTttClick);
+sudokuBoard.addEventListener("click", handleSudokuCellClick);
+sudokuKeypad.addEventListener("click", handleSudokuKeyClick);
+sudokuDifficultyButtons.forEach((button) => button.addEventListener("click", handleSudokuDifficultyChange));
 gameButtons.forEach((button) => button.addEventListener("click", handleGameSwitch));
 langButtons.forEach((button) => button.addEventListener("click", handleLanguageChange));
 
@@ -432,6 +600,30 @@ function createTttState(previous = {}) {
   };
 }
 
+function createSudokuState(previous = {}) {
+  return {
+    difficulty: previous.difficulty ?? "easy",
+    board: Array(81).fill(0),
+    givens: Array(81).fill(false),
+    solution: Array(81).fill(0),
+    running: false,
+    completed: false,
+    selectedCell: -1,
+    selectedNumber: 0,
+    mistakes: 0,
+    filledCount: 0,
+    elapsedMs: 0,
+    startedAtMs: 0,
+    pendingResult: null,
+    statusKey: previous.statusKey ?? "statusReady",
+    statusArgs: previous.statusArgs ?? [],
+    saveHintKey: previous.saveHintKey ?? "saveHintDefault",
+    saveHintArgs: previous.saveHintArgs ?? [],
+    invalidCell: -1,
+    timerId: 0,
+  };
+}
+
 function inactiveReactionTile(feedback = "") {
   return {
     active: false,
@@ -445,6 +637,11 @@ function inactiveReactionTile(feedback = "") {
 function handleStartButton() {
   if (activeGame === "reaction") {
     startReactionGame();
+    return;
+  }
+
+  if (activeGame === "sudoku") {
+    startSudokuGame();
     return;
   }
 
@@ -471,6 +668,10 @@ function deactivateGame(gameId) {
   if (gameId === "ttt" && (tttState.running || tttState.botThinking)) {
     clearTimeout(tttState.botTimerId);
     tttState = createTttState(tttState);
+  }
+
+  if (gameId === "sudoku" && !sudokuState.running) {
+    clearInterval(sudokuState.timerId);
   }
 }
 
@@ -508,6 +709,8 @@ function applyLanguage(language) {
   renderActiveGame();
   renderReactionArena(performance.now());
   renderTttBoard();
+  renderSudokuBoard();
+  renderSudokuControls();
 }
 
 function renderGameMenu() {
@@ -530,11 +733,17 @@ function renderActiveGame() {
 
   reactionView.hidden = activeGame !== "reaction";
   tttView.hidden = activeGame !== "ttt";
+  sudokuView.hidden = activeGame !== "sudoku";
   gameBadge.textContent = config.badgeLabel;
   gameTitle.textContent = config.name;
   gameDescription.textContent = config.description;
-  rankingContext.textContent = config.rankingContext;
-  saveLabel.textContent = config.saveLabel;
+  rankingContext.textContent = activeGame === "sudoku"
+    ? resolveGameMessage("sudoku", "rankingContext", getSudokuDifficultyLabel())
+    : config.rankingContext;
+  saveLabel.textContent = typeof config.saveLabel === "function" ? config.saveLabel() : config.saveLabel;
+  if (activeGame === "sudoku") {
+    sudokuSubtitle.textContent = config.subtitle;
+  }
 
   config.tags.forEach((tag, index) => {
     if (gameTagElements[index]) {
@@ -552,15 +761,34 @@ function renderActiveGame() {
   renderLeaderboard();
   renderReactionArena(performance.now());
   renderTttBoard();
+  renderSudokuBoard();
+  renderSudokuControls();
 }
 
 function renderStatus() {
   const state = getActiveState();
+
+  if (activeGame === "sudoku" && (state.statusKey === "statusReady" || state.statusKey === "statusStarted")) {
+    statusText.textContent = resolveGameMessage("sudoku", state.statusKey, getSudokuDifficultyLabel());
+    return;
+  }
+
   statusText.textContent = resolveGameMessage(activeGame, state.statusKey, ...state.statusArgs);
 }
 
 function renderSaveHint() {
   const state = getActiveState();
+
+  if (activeGame === "sudoku" && state.saveHintKey === "saveHintDefault") {
+    saveHint.textContent = resolveGameMessage("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
+    return;
+  }
+
+  if (activeGame === "sudoku" && state.saveHintKey === "saveHintResult") {
+    saveHint.textContent = resolveGameMessage("sudoku", "saveHintResult", getSudokuDifficultyLabel(), state.saveHintArgs[1], state.saveHintArgs[2]);
+    return;
+  }
+
   saveHint.textContent = resolveGameMessage(activeGame, state.saveHintKey, ...state.saveHintArgs);
 }
 
@@ -584,19 +812,30 @@ function updateHud(now) {
     return;
   }
 
-  statValues[0].textContent = String(tttState.wins);
-  statValues[1].textContent = String(tttState.draws);
-  statValues[2].textContent = String(tttState.losses);
-  statValues[3].textContent = String(tttState.moves);
+  if (activeGame === "ttt") {
+    statValues[0].textContent = String(tttState.wins);
+    statValues[1].textContent = String(tttState.draws);
+    statValues[2].textContent = String(tttState.losses);
+    statValues[3].textContent = String(tttState.moves);
+    return;
+  }
+
+  statValues[0].textContent = getSudokuDifficultyLabel();
+  statValues[1].textContent = `${sudokuState.filledCount}/81`;
+  statValues[2].textContent = String(sudokuState.mistakes);
+  statValues[3].textContent = formatDuration(getSudokuElapsedMs());
 }
 
 function setGameStatus(gameId, key, ...args) {
   if (gameId === "reaction") {
     reactionState.statusKey = key;
     reactionState.statusArgs = args;
-  } else {
+  } else if (gameId === "ttt") {
     tttState.statusKey = key;
     tttState.statusArgs = args;
+  } else {
+    sudokuState.statusKey = key;
+    sudokuState.statusArgs = args;
   }
 
   if (gameId === activeGame) {
@@ -608,9 +847,12 @@ function setGameSaveHint(gameId, key, ...args) {
   if (gameId === "reaction") {
     reactionState.saveHintKey = key;
     reactionState.saveHintArgs = args;
-  } else {
+  } else if (gameId === "ttt") {
     tttState.saveHintKey = key;
     tttState.saveHintArgs = args;
+  } else {
+    sudokuState.saveHintKey = key;
+    sudokuState.saveHintArgs = args;
   }
 
   if (gameId === activeGame) {
@@ -1089,6 +1331,303 @@ function renderTttBoard() {
   });
 }
 
+function initializeSudokuUi() {
+  for (let index = 0; index < 81; index += 1) {
+    const cell = document.createElement("button");
+    const row = Math.floor(index / 9);
+    const col = index % 9;
+
+    cell.type = "button";
+    cell.className = "sudoku-cell";
+    cell.dataset.sudokuCell = String(index);
+
+    if (col === 2 || col === 5) {
+      cell.classList.add("is-block-right");
+    }
+
+    if (row === 2 || row === 5) {
+      cell.classList.add("is-block-bottom");
+    }
+
+    sudokuBoard.appendChild(cell);
+  }
+
+  for (let value = 1; value <= 9; value += 1) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "sudoku-key";
+    button.dataset.sudokuValue = String(value);
+    sudokuKeypad.appendChild(button);
+  }
+
+  const eraseButton = document.createElement("button");
+  eraseButton.type = "button";
+  eraseButton.className = "sudoku-key is-erase";
+  eraseButton.dataset.sudokuValue = "0";
+  sudokuKeypad.appendChild(eraseButton);
+}
+
+function renderSudokuControls() {
+  if (!sudokuDifficultyButtons.length || !sudokuKeys.length) {
+    return;
+  }
+
+  const config = getGameCopy("sudoku");
+
+  sudokuDifficultyButtons.forEach((button) => {
+    const difficulty = button.dataset.sudokuDifficulty;
+    const isActive = sudokuState.difficulty === difficulty;
+    button.textContent = config.difficultyOptions[difficulty];
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  sudokuKeys.forEach((button) => {
+    const value = Number(button.dataset.sudokuValue);
+    button.textContent = value === 0 ? config.eraseLabel : String(value);
+    button.classList.toggle("is-active", sudokuState.selectedNumber === value);
+    button.setAttribute("aria-pressed", String(sudokuState.selectedNumber === value));
+  });
+}
+
+function handleSudokuDifficultyChange(event) {
+  const difficulty = event.currentTarget.dataset.sudokuDifficulty;
+  if (!SUDOKU_DIFFICULTIES.includes(difficulty) || sudokuState.difficulty === difficulty) {
+    return;
+  }
+
+  clearInterval(sudokuState.timerId);
+  sudokuState = createSudokuState({ difficulty });
+  sudokuState.difficulty = difficulty;
+
+  if (activeGame === "sudoku") {
+    startSudokuGame();
+  } else {
+    setGameStatus("sudoku", "statusReady", getSudokuDifficultyLabel());
+    setGameSaveHint("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
+    renderSudokuControls();
+  }
+}
+
+function startSudokuGame() {
+  clearInterval(sudokuState.timerId);
+
+  const difficulty = sudokuState.difficulty;
+  const puzzle = chooseSudokuPuzzle(difficulty);
+
+  sudokuState = createSudokuState(sudokuState);
+  sudokuState.difficulty = difficulty;
+  sudokuState.board = puzzle.puzzle.split("").map((value) => Number(value));
+  sudokuState.givens = sudokuState.board.map((value) => value !== 0);
+  sudokuState.solution = puzzle.solution.split("").map((value) => Number(value));
+  sudokuState.running = true;
+  sudokuState.completed = false;
+  sudokuState.selectedCell = -1;
+  sudokuState.selectedNumber = 0;
+  sudokuState.mistakes = 0;
+  sudokuState.filledCount = sudokuState.board.filter((value) => value !== 0).length;
+  sudokuState.elapsedMs = 0;
+  sudokuState.startedAtMs = Date.now();
+  sudokuState.pendingResult = null;
+  sudokuState.invalidCell = -1;
+
+  playerNameInput.value = localStorage.getItem(STORAGE_KEYS.playerName) ?? "";
+  saveForm.hidden = true;
+  setGameStatus("sudoku", "statusStarted", getSudokuDifficultyLabel());
+  setGameSaveHint("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
+  startSudokuTimer();
+  updateStartButtonLabel();
+  updateHud(performance.now());
+  renderSudokuBoard();
+  renderSudokuControls();
+  renderLeaderboard();
+}
+
+function startSudokuTimer() {
+  clearInterval(sudokuState.timerId);
+  sudokuState.timerId = window.setInterval(() => {
+    sudokuState.elapsedMs = Date.now() - sudokuState.startedAtMs;
+    if (activeGame === "sudoku") {
+      updateHud(performance.now());
+    }
+  }, 200);
+}
+
+function handleSudokuCellClick(event) {
+  if (activeGame !== "sudoku") {
+    return;
+  }
+
+  const button = event.target.closest("[data-sudoku-cell]");
+  if (!button || !sudokuState.running || sudokuState.completed) {
+    return;
+  }
+
+  const index = Number(button.dataset.sudokuCell);
+  sudokuState.selectedCell = index;
+
+  if (sudokuState.board[index] !== 0) {
+    sudokuState.selectedNumber = sudokuState.board[index];
+    renderSudokuControls();
+  }
+
+  renderSudokuBoard();
+
+  if (!sudokuState.givens[index] && sudokuState.selectedNumber !== 0) {
+    applySudokuInput(index, sudokuState.selectedNumber);
+  }
+}
+
+function handleSudokuKeyClick(event) {
+  if (activeGame !== "sudoku") {
+    return;
+  }
+
+  const button = event.target.closest("[data-sudoku-value]");
+  if (!button || !sudokuState.running || sudokuState.completed) {
+    return;
+  }
+
+  const value = Number(button.dataset.sudokuValue);
+  sudokuState.selectedNumber = sudokuState.selectedNumber === value ? 0 : value;
+
+  renderSudokuControls();
+  renderSudokuBoard();
+
+  if (sudokuState.selectedCell !== -1 && !sudokuState.givens[sudokuState.selectedCell] && sudokuState.selectedNumber !== 0) {
+    applySudokuInput(sudokuState.selectedCell, sudokuState.selectedNumber);
+  }
+
+  if (value === 0 && sudokuState.selectedCell !== -1 && !sudokuState.givens[sudokuState.selectedCell]) {
+    sudokuState.board[sudokuState.selectedCell] = 0;
+    sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+    updateHud(performance.now());
+    renderSudokuBoard();
+  }
+}
+
+function applySudokuInput(index, value) {
+  if (sudokuState.givens[index]) {
+    return;
+  }
+
+  if (value === 0) {
+    sudokuState.board[index] = 0;
+    sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+    updateHud(performance.now());
+    renderSudokuBoard();
+    return;
+  }
+
+  if (sudokuState.solution[index] !== value) {
+    sudokuState.mistakes += 1;
+    sudokuState.invalidCell = index;
+    setGameStatus("sudoku", "statusMistake", value, sudokuState.mistakes);
+    updateHud(performance.now());
+    renderSudokuBoard();
+
+    window.setTimeout(() => {
+      if (sudokuState.invalidCell === index) {
+        sudokuState.invalidCell = -1;
+        if (activeGame === "sudoku") {
+          renderSudokuBoard();
+        }
+      }
+    }, 280);
+    return;
+  }
+
+  sudokuState.board[index] = value;
+  sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+  updateHud(performance.now());
+  renderSudokuBoard();
+
+  if (isSudokuSolved()) {
+    finishSudokuGame();
+  }
+}
+
+function finishSudokuGame() {
+  clearInterval(sudokuState.timerId);
+  sudokuState.running = false;
+  sudokuState.completed = true;
+  sudokuState.elapsedMs = Date.now() - sudokuState.startedAtMs;
+
+  const result = {
+    difficulty: sudokuState.difficulty,
+    elapsedMs: sudokuState.elapsedMs,
+    mistakes: sudokuState.mistakes,
+    playedAt: new Date().toISOString(),
+  };
+
+  const canSave = qualifiesForLeaderboard("sudoku", result);
+  sudokuState.pendingResult = canSave ? result : null;
+
+  if (canSave) {
+    saveForm.hidden = false;
+    setGameSaveHint("sudoku", "saveHintResult", getSudokuDifficultyLabel(), formatDuration(result.elapsedMs), result.mistakes);
+    playerNameInput.focus();
+  } else {
+    saveForm.hidden = true;
+    setGameSaveHint("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
+  }
+
+  setGameStatus("sudoku", canSave ? "statusSolvedSave" : "statusSolvedNoSave", formatDuration(result.elapsedMs), result.mistakes);
+  updateStartButtonLabel();
+  updateHud(performance.now());
+  renderSudokuBoard();
+}
+
+function renderSudokuBoard() {
+  sudokuCells.forEach((cell, index) => {
+    const value = sudokuState.board[index];
+    const isSelected = sudokuState.selectedCell === index;
+    const isHighlight = sudokuState.selectedNumber !== 0 && value === sudokuState.selectedNumber;
+
+    cell.classList.remove("is-given", "is-selected", "is-highlight", "is-invalid");
+    cell.textContent = value === 0 ? "" : String(value);
+    cell.disabled = activeGame !== "sudoku" || sudokuState.completed;
+    cell.setAttribute("aria-label", `${t("sudokuCellLabel")} ${index + 1}`);
+
+    if (sudokuState.givens[index]) {
+      cell.classList.add("is-given");
+    }
+
+    if (isSelected) {
+      cell.classList.add("is-selected");
+    }
+
+    if (isHighlight) {
+      cell.classList.add("is-highlight");
+    }
+
+    if (sudokuState.invalidCell === index) {
+      cell.classList.add("is-invalid");
+    }
+  });
+}
+
+function chooseSudokuPuzzle(difficulty) {
+  const pool = SUDOKU_PUZZLES[difficulty];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function isSudokuSolved() {
+  return sudokuState.board.every((value, index) => value === sudokuState.solution[index]);
+}
+
+function getSudokuDifficultyLabel() {
+  return getGameCopy("sudoku").difficultyOptions[sudokuState.difficulty];
+}
+
+function getSudokuElapsedMs() {
+  if (sudokuState.running) {
+    return Date.now() - sudokuState.startedAtMs;
+  }
+
+  return sudokuState.elapsedMs;
+}
+
 function handleSaveScore(event) {
   event.preventDefault();
 
@@ -1102,39 +1641,53 @@ function handleSaveScore(event) {
   localStorage.setItem(STORAGE_KEYS.playerName, safeName);
 
   const entry = { name: safeName, ...state.pendingResult };
-  leaderboards[activeGame] = sortLeaderboard(activeGame, [...leaderboards[activeGame], entry]).slice(0, 10);
+  const currentEntries = getLeaderboardEntries(activeGame);
+  const nextEntries = sortLeaderboard(activeGame, [...currentEntries, entry]).slice(0, 10);
+  setLeaderboardEntries(activeGame, nextEntries);
   persistLeaderboard(activeGame);
 
   state.pendingResult = null;
   saveForm.hidden = true;
-  setGameSaveHint(activeGame, "saveHintDefault");
-  setGameStatus(activeGame, "saveSuccess", leaderboards[activeGame].length);
+  if (activeGame === "sudoku") {
+    setGameSaveHint("sudoku", "saveHintDefault", getSudokuDifficultyLabel());
+    setGameStatus("sudoku", "saveSuccess", getLeaderboardEntries("sudoku").length);
+  } else {
+    setGameSaveHint(activeGame, "saveHintDefault");
+    setGameStatus(activeGame, "saveSuccess", getLeaderboardEntries(activeGame).length);
+  }
   updateStartButtonLabel();
   renderLeaderboard();
 }
 
 function handleClearLeaderboard() {
   const config = getGameCopy(activeGame);
-  if (!leaderboards[activeGame].length) {
+  if (!getLeaderboardEntries(activeGame).length) {
     setGameStatus(activeGame, "clearEmpty");
     return;
   }
 
-  if (!window.confirm(config.clearConfirm)) {
+  const confirmMessage = activeGame === "sudoku"
+    ? resolveGameMessage("sudoku", "clearConfirm", getSudokuDifficultyLabel())
+    : config.clearConfirm;
+
+  if (!window.confirm(confirmMessage)) {
     return;
   }
 
-  leaderboards[activeGame] = [];
+  setLeaderboardEntries(activeGame, []);
   persistLeaderboard(activeGame);
   renderLeaderboard();
   setGameStatus(activeGame, "clearDone");
 }
 
 function renderLeaderboard() {
-  const entries = leaderboards[activeGame];
+  const entries = getLeaderboardEntries(activeGame);
 
   if (!entries.length) {
-    rankingList.innerHTML = `<li class="rank-empty">${escapeHtml(getGameCopy(activeGame).noRanking)}</li>`;
+    const emptyMessage = activeGame === "sudoku"
+      ? resolveGameMessage("sudoku", "noRanking", getSudokuDifficultyLabel())
+      : getGameCopy(activeGame).noRanking;
+    rankingList.innerHTML = `<li class="rank-empty">${escapeHtml(emptyMessage)}</li>`;
     return;
   }
 
@@ -1143,7 +1696,10 @@ function renderLeaderboard() {
       const dateLabel = formatDate(entry.playedAt);
       const meta = activeGame === "reaction"
         ? resolveGameMessage("reaction", "rankingMeta", entry.accuracy, entry.bestCombo, dateLabel)
-        : resolveGameMessage("ttt", "rankingMeta", resolveGameMessage("ttt", outcomeKey(entry.outcome)), entry.turns, dateLabel);
+        : activeGame === "ttt"
+          ? resolveGameMessage("ttt", "rankingMeta", resolveGameMessage("ttt", outcomeKey(entry.outcome)), entry.turns, dateLabel)
+          : resolveGameMessage("sudoku", "rankingMeta", entry.mistakes, dateLabel);
+      const scoreLabel = activeGame === "sudoku" ? formatDuration(entry.elapsedMs) : String(entry.score);
 
       return `
         <li>
@@ -1152,11 +1708,37 @@ function renderLeaderboard() {
             <strong>${escapeHtml(entry.name)}</strong>
             <span>${escapeHtml(meta)}</span>
           </div>
-          <span class="rank-score">${entry.score}</span>
+          <span class="rank-score">${scoreLabel}</span>
         </li>
       `;
     })
     .join("");
+}
+
+function getLeaderboardEntries(gameId) {
+  if (gameId === "reaction") {
+    return leaderboards.reaction;
+  }
+
+  if (gameId === "ttt") {
+    return leaderboards.ttt;
+  }
+
+  return leaderboards.sudoku[sudokuState.difficulty];
+}
+
+function setLeaderboardEntries(gameId, entries) {
+  if (gameId === "reaction") {
+    leaderboards.reaction = entries;
+    return;
+  }
+
+  if (gameId === "ttt") {
+    leaderboards.ttt = entries;
+    return;
+  }
+
+  leaderboards.sudoku[sudokuState.difficulty] = entries;
 }
 
 function sortLeaderboard(gameId, entries) {
@@ -1172,6 +1754,18 @@ function sortLeaderboard(gameId, entries) {
     });
   }
 
+  if (gameId === "sudoku") {
+    return entries.sort((left, right) => {
+      if ((left.elapsedMs ?? Number.MAX_SAFE_INTEGER) !== (right.elapsedMs ?? Number.MAX_SAFE_INTEGER)) {
+        return (left.elapsedMs ?? Number.MAX_SAFE_INTEGER) - (right.elapsedMs ?? Number.MAX_SAFE_INTEGER);
+      }
+      if ((left.mistakes ?? Number.MAX_SAFE_INTEGER) !== (right.mistakes ?? Number.MAX_SAFE_INTEGER)) {
+        return (left.mistakes ?? Number.MAX_SAFE_INTEGER) - (right.mistakes ?? Number.MAX_SAFE_INTEGER);
+      }
+      return 0;
+    });
+  }
+
   return entries.sort((left, right) => {
     if (right.score !== left.score) {
       return right.score - left.score;
@@ -1184,11 +1778,15 @@ function sortLeaderboard(gameId, entries) {
 }
 
 function qualifiesForLeaderboard(gameId, result) {
-  if (result.score <= 0) {
+  if (gameId !== "sudoku" && result.score <= 0) {
     return false;
   }
 
-  const sorted = sortLeaderboard(gameId, [...leaderboards[gameId], result]).slice(0, 10);
+  if (gameId === "sudoku" && result.elapsedMs <= 0) {
+    return false;
+  }
+
+  const sorted = sortLeaderboard(gameId, [...getLeaderboardEntries(gameId), result]).slice(0, 10);
   return sorted.includes(result);
 }
 
@@ -1253,9 +1851,61 @@ function loadTttLeaderboard() {
   }
 }
 
+function loadSudokuLeaderboard() {
+  const empty = {
+    easy: [],
+    medium: [],
+    hard: [],
+    expert: [],
+  };
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.sudokuLeaderboard);
+    if (!raw) {
+      return empty;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return empty;
+    }
+
+    return Object.fromEntries(
+      SUDOKU_DIFFICULTIES.map((difficulty) => {
+        const entries = Array.isArray(parsed[difficulty]) ? parsed[difficulty] : [];
+        const normalized = sortLeaderboard(
+          "sudoku",
+          entries
+            .map((item) => ({
+              name: sanitizeName(String(item.name ?? "Player")),
+              difficulty,
+              elapsedMs: Number(item.elapsedMs ?? 0),
+              mistakes: Number(item.mistakes ?? 0),
+              playedAt: String(item.playedAt ?? ""),
+            }))
+            .filter((item) => Number.isFinite(item.elapsedMs) && item.elapsedMs > 0),
+        ).slice(0, 10);
+
+        return [difficulty, normalized];
+      }),
+    );
+  } catch {
+    return empty;
+  }
+}
+
 function persistLeaderboard(gameId) {
-  const key = gameId === "reaction" ? STORAGE_KEYS.reactionLeaderboard : STORAGE_KEYS.tttLeaderboard;
-  localStorage.setItem(key, JSON.stringify(leaderboards[gameId]));
+  if (gameId === "reaction") {
+    localStorage.setItem(STORAGE_KEYS.reactionLeaderboard, JSON.stringify(leaderboards.reaction));
+    return;
+  }
+
+  if (gameId === "ttt") {
+    localStorage.setItem(STORAGE_KEYS.tttLeaderboard, JSON.stringify(leaderboards.ttt));
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEYS.sudokuLeaderboard, JSON.stringify(leaderboards.sudoku));
 }
 
 function loadLanguage() {
@@ -1269,11 +1919,27 @@ function loadActiveGame() {
 }
 
 function getActiveState() {
-  return activeGame === "reaction" ? reactionState : tttState;
+  if (activeGame === "reaction") {
+    return reactionState;
+  }
+
+  if (activeGame === "ttt") {
+    return tttState;
+  }
+
+  return sudokuState;
 }
 
 function isGameRunning(gameId) {
-  return gameId === "reaction" ? reactionState.running : tttState.running;
+  if (gameId === "reaction") {
+    return reactionState.running;
+  }
+
+  if (gameId === "ttt") {
+    return tttState.running;
+  }
+
+  return sudokuState.running;
 }
 
 function hasGameActivity(gameId) {
@@ -1286,7 +1952,11 @@ function hasGameActivity(gameId) {
       || reactionState.mistakes > 0;
   }
 
-  return tttState.running || tttState.finished || tttState.moves > 0;
+  if (gameId === "ttt") {
+    return tttState.running || tttState.finished || tttState.moves > 0;
+  }
+
+  return sudokuState.running || sudokuState.completed || sudokuState.filledCount > 0 || sudokuState.mistakes > 0;
 }
 
 function getGameCopy(gameId) {
@@ -1325,6 +1995,13 @@ function t(key) {
 
 function formatAccuracy(value) {
   return `${Math.round(value)}%`;
+}
+
+function formatDuration(milliseconds) {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }
 
 function formatDate(value) {

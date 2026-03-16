@@ -75,6 +75,11 @@
               <strong class="game-choice-title"></strong>
               <span class="game-choice-desc"></span>
             </button>
+            <button class="game-choice" type="button" data-game="sudoku">
+              <span class="game-choice-index"></span>
+              <strong class="game-choice-title"></strong>
+              <span class="game-choice-desc"></span>
+            </button>
           </div>
         </aside>
 
@@ -136,6 +141,22 @@
                 <button class="ttt-cell" type="button" data-ttt-cell="7" aria-label="Tic-Tac-Toe cell 8"></button>
                 <button class="ttt-cell" type="button" data-ttt-cell="8" aria-label="Tic-Tac-Toe cell 9"></button>
               </div>
+            </div>
+          </div>
+
+          <div id="sudoku-view" class="game-view" hidden>
+            <div class="sudoku-toolbar">
+              <div id="sudoku-difficulties" class="difficulty-switch" role="group" aria-label="Sudoku difficulties">
+                <button class="difficulty-button" type="button" data-sudoku-difficulty="easy"></button>
+                <button class="difficulty-button" type="button" data-sudoku-difficulty="medium"></button>
+                <button class="difficulty-button" type="button" data-sudoku-difficulty="hard"></button>
+                <button class="difficulty-button" type="button" data-sudoku-difficulty="expert"></button>
+              </div>
+              <p id="sudoku-subtitle" class="panel-intro"></p>
+            </div>
+            <div class="sudoku-shell">
+              <div id="sudoku-board" class="sudoku-board" role="grid" aria-label="Sudoku board"></div>
+              <div id="sudoku-keypad" class="sudoku-keypad" role="group" aria-label="Sudoku keypad"></div>
             </div>
           </div>
         </section>
