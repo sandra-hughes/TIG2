@@ -163,8 +163,8 @@ const I18N = {
         indexLabel: "Game 03",
         badgeLabel: "Game 03",
         name: "Sudoku",
-        nav: "4 difficulties, digit highlight",
-        description: "Solve a classic 9x9 grid across four difficulty levels. Click a digit to highlight every matching number already placed on the board.",
+        nav: "4 difficulties, notes, highlight",
+        description: "Solve a classic 9x9 grid across four difficulty levels. Click a digit to highlight every matching number already placed, use Notes to sketch candidates, and undo the last edit when needed.",
         rankingContext: (difficultyLabel) => `Sudoku ${difficultyLabel} local top 10`,
         startIdle: "New Puzzle",
         startRestart: "Restart Puzzle",
@@ -183,10 +183,11 @@ const I18N = {
         noRanking: (difficultyLabel) => `No ${difficultyLabel} Sudoku runs saved yet.`,
         rankingMeta: (mistakes, date) => `${mistakes} mistake${mistakes === 1 ? "" : "s"} · ${date}`,
         hudLabels: ["Difficulty", "Filled", "Mistakes", "Time"],
-        tags: ["4 difficulties", "Digit highlight", "Local ranking"],
+        tags: ["4 difficulties", "Notes + undo", "Local ranking"],
         rules: [
           "Choose between Easy, Medium, Hard, and Expert before starting a puzzle.",
           "Click a digit such as <strong>2</strong> on the keypad to highlight every matching number already filled on the grid.",
+          "Turn on Notes to draft candidates in empty cells, and use Undo to step back the last edit or erase.",
           "Only editable cells can be changed. Wrong entries do not stay on the board and increase your mistake count.",
           "Rankings are stored separately for each difficulty and sorted by fastest clear time.",
         ],
@@ -196,8 +197,11 @@ const I18N = {
           hard: "Hard",
           expert: "Expert",
         },
-        subtitle: "Click a digit to highlight every matching number already placed on the board.",
+        subtitle: "Click a digit to highlight matches, use Notes for drafts, and Undo to roll back the last edit.",
         eraseLabel: "Erase",
+        undoLabel: "Undo",
+        notesLabel: "Notes",
+        notesActiveLabel: "Notes On",
       },
     },
   },
@@ -303,8 +307,8 @@ const I18N = {
         indexLabel: "游戏 03",
         badgeLabel: "游戏 03",
         name: "数独",
-        nav: "4 个难度，数字联动高亮",
-        description: "在 9x9 经典数独盘面中选择四档难度。点击某个数字，会高亮棋盘中所有已填入的相同数字。",
+        nav: "4 个难度，草稿，高亮",
+        description: "在 9x9 经典数独盘面中选择四档难度。点击某个数字会高亮棋盘中所有已填入的相同数字，还可以开启草稿模式记录候选数，并撤回上一步编辑。",
         rankingContext: (difficultyLabel) => `数独 ${difficultyLabel} 本地前 10`,
         startIdle: "新题目",
         startRestart: "重新开题",
@@ -323,10 +327,11 @@ const I18N = {
         noRanking: (difficultyLabel) => `还没有 ${difficultyLabel} 数独记录。`,
         rankingMeta: (mistakes, date) => `失误 ${mistakes} 次 · ${date}`,
         hudLabels: ["难度", "已填", "失误", "时间"],
-        tags: ["4 个难度", "数字高亮", "独立榜单"],
+        tags: ["4 个难度", "草稿与撤回", "独立榜单"],
         rules: [
           "开始前可选择简单、中等、困难、专家四个难度。",
           "点击数字键，例如 <strong>2</strong>，会高亮棋盘上所有已经填入的 2。",
+          "开启草稿模式后可以在空格里记录候选数，撤回按钮可以回退上一步输入或清除动作。",
           "只有可编辑空格能被修改。错误输入不会保留在棋盘上，但会增加失误次数。",
           "排行榜按难度分别保存，并按最短完成时间排序。",
         ],
@@ -336,8 +341,11 @@ const I18N = {
           hard: "困难",
           expert: "专家",
         },
-        subtitle: "点击数字即可高亮棋盘中所有已出现的相同数字。",
+        subtitle: "点击数字即可高亮同号，开启草稿可记候选数，撤回可回退上一步。",
         eraseLabel: "清除",
+        undoLabel: "撤回",
+        notesLabel: "草稿",
+        notesActiveLabel: "草稿中",
       },
     },
   },
@@ -443,8 +451,8 @@ const I18N = {
         indexLabel: "Game 03",
         badgeLabel: "Game 03",
         name: "Sudoku",
-        nav: "4 難易度、数字ハイライト",
-        description: "4 段階の難易度で 9x9 の数独を解きます。数字をクリックすると、盤面上の同じ数字がすべて強調表示されます。",
+        nav: "4 難易度、メモ、ハイライト",
+        description: "4 段階の難易度で 9x9 の数独を解きます。数字クリックで同じ数字を強調表示し、メモで候補を書き込み、必要なら直前の編集を取り消せます。",
         rankingContext: (difficultyLabel) => `Sudoku ${difficultyLabel} ローカル Top 10`,
         startIdle: "新しい問題",
         startRestart: "問題をやり直す",
@@ -463,10 +471,11 @@ const I18N = {
         noRanking: (difficultyLabel) => `${difficultyLabel} の Sudoku 記録はまだありません。`,
         rankingMeta: (mistakes, date) => `ミス ${mistakes} 回 · ${date}`,
         hudLabels: ["難易度", "入力数", "ミス", "時間"],
-        tags: ["4 難易度", "数字ハイライト", "難易度別ランキング"],
+        tags: ["4 難易度", "メモと取り消し", "難易度別ランキング"],
         rules: [
           "Easy、Medium、Hard、Expert の 4 段階から難易度を選べます。",
           "数字キー、たとえば <strong>2</strong> をクリックすると、盤面に入力済みの 2 がすべてハイライトされます。",
+          "メモを有効にすると空欄に候補を書き込めます。取り消しで直前の入力や消去を戻せます。",
           "編集できるのは空欄だけです。誤入力は盤面に残りませんが、ミス数は増えます。",
           "ランキングは難易度ごとに分かれており、最短クリア時間順で並びます。",
         ],
@@ -476,8 +485,11 @@ const I18N = {
           hard: "Hard",
           expert: "Expert",
         },
-        subtitle: "数字をクリックすると、盤面上の同じ数字がすべて強調表示されます。",
+        subtitle: "数字で同値を強調表示し、メモで候補を書き、取り消しで直前の編集を戻せます。",
         eraseLabel: "消去",
+        undoLabel: "取り消し",
+        notesLabel: "メモ",
+        notesActiveLabel: "メモ ON",
       },
     },
   },
@@ -492,6 +504,8 @@ initializeSudokuUi();
 const tttCells = Array.from(document.querySelectorAll("[data-ttt-cell]"));
 const sudokuCells = Array.from(document.querySelectorAll("[data-sudoku-cell]"));
 const sudokuKeys = Array.from(document.querySelectorAll("[data-sudoku-value]"));
+const sudokuUndoButton = document.querySelector("[data-sudoku-action='undo']");
+const sudokuNotesButton = document.querySelector("[data-sudoku-action='notes']");
 const sudokuDifficultyButtons = Array.from(document.querySelectorAll("[data-sudoku-difficulty]"));
 const startButton = document.querySelector("#start-button");
 const statusText = document.querySelector("#status-text");
@@ -604,12 +618,15 @@ function createSudokuState(previous = {}) {
   return {
     difficulty: previous.difficulty ?? "easy",
     board: Array(81).fill(0),
+    notes: Array.from({ length: 81 }, () => []),
     givens: Array(81).fill(false),
     solution: Array(81).fill(0),
+    history: [],
     running: false,
     completed: false,
     selectedCell: -1,
     selectedNumber: 0,
+    noteMode: false,
     mistakes: 0,
     filledCount: 0,
     elapsedMs: 0,
@@ -1365,6 +1382,36 @@ function initializeSudokuUi() {
   eraseButton.className = "sudoku-key is-erase";
   eraseButton.dataset.sudokuValue = "0";
   sudokuKeypad.appendChild(eraseButton);
+
+  const notesButton = document.createElement("button");
+  notesButton.type = "button";
+  notesButton.className = "sudoku-key is-action";
+  notesButton.dataset.sudokuAction = "notes";
+  sudokuKeypad.appendChild(notesButton);
+
+  const undoButton = document.createElement("button");
+  undoButton.type = "button";
+  undoButton.className = "sudoku-key is-action";
+  undoButton.dataset.sudokuAction = "undo";
+  sudokuKeypad.appendChild(undoButton);
+}
+
+function cloneSudokuNotes(notes) {
+  return notes.map((values) => [...values]);
+}
+
+function pushSudokuHistory() {
+  sudokuState.history.push({
+    board: [...sudokuState.board],
+    notes: cloneSudokuNotes(sudokuState.notes),
+    filledCount: sudokuState.filledCount,
+    selectedCell: sudokuState.selectedCell,
+    selectedNumber: sudokuState.selectedNumber,
+  });
+
+  if (sudokuState.history.length > 160) {
+    sudokuState.history.shift();
+  }
 }
 
 function renderSudokuControls() {
@@ -1384,10 +1431,23 @@ function renderSudokuControls() {
 
   sudokuKeys.forEach((button) => {
     const value = Number(button.dataset.sudokuValue);
+    const isActive = value !== 0 && sudokuState.selectedNumber === value;
     button.textContent = value === 0 ? config.eraseLabel : String(value);
-    button.classList.toggle("is-active", sudokuState.selectedNumber === value);
-    button.setAttribute("aria-pressed", String(sudokuState.selectedNumber === value));
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
+
+  if (sudokuNotesButton) {
+    sudokuNotesButton.textContent = sudokuState.noteMode ? config.notesActiveLabel : config.notesLabel;
+    sudokuNotesButton.classList.toggle("is-active", sudokuState.noteMode);
+    sudokuNotesButton.disabled = !sudokuState.running || sudokuState.completed;
+    sudokuNotesButton.setAttribute("aria-pressed", String(sudokuState.noteMode));
+  }
+
+  if (sudokuUndoButton) {
+    sudokuUndoButton.textContent = config.undoLabel;
+    sudokuUndoButton.disabled = !sudokuState.running || sudokuState.completed || sudokuState.history.length === 0;
+  }
 }
 
 function handleSudokuDifficultyChange(event) {
@@ -1424,8 +1484,11 @@ function startSudokuGame() {
   sudokuState.completed = false;
   sudokuState.selectedCell = -1;
   sudokuState.selectedNumber = 0;
+  sudokuState.noteMode = false;
   sudokuState.mistakes = 0;
   sudokuState.filledCount = sudokuState.board.filter((value) => value !== 0).length;
+  sudokuState.notes = Array.from({ length: 81 }, () => []);
+  sudokuState.history = [];
   sudokuState.elapsedMs = 0;
   sudokuState.startedAtMs = Date.now();
   sudokuState.pendingResult = null;
@@ -1469,17 +1532,30 @@ function handleSudokuCellClick(event) {
   if (sudokuState.board[index] !== 0) {
     sudokuState.selectedNumber = sudokuState.board[index];
     renderSudokuControls();
+    renderSudokuBoard();
+    return;
   }
 
   renderSudokuBoard();
 
   if (!sudokuState.givens[index] && sudokuState.selectedNumber !== 0) {
+    if (sudokuState.noteMode) {
+      toggleSudokuNote(index, sudokuState.selectedNumber);
+      return;
+    }
+
     applySudokuInput(index, sudokuState.selectedNumber);
   }
 }
 
 function handleSudokuKeyClick(event) {
   if (activeGame !== "sudoku") {
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-sudoku-action]");
+  if (actionButton) {
+    handleSudokuAction(actionButton.dataset.sudokuAction);
     return;
   }
 
@@ -1494,16 +1570,90 @@ function handleSudokuKeyClick(event) {
   renderSudokuControls();
   renderSudokuBoard();
 
-  if (sudokuState.selectedCell !== -1 && !sudokuState.givens[sudokuState.selectedCell] && sudokuState.selectedNumber !== 0) {
-    applySudokuInput(sudokuState.selectedCell, sudokuState.selectedNumber);
+  if (sudokuState.selectedCell === -1 || sudokuState.givens[sudokuState.selectedCell]) {
+    return;
   }
 
-  if (value === 0 && sudokuState.selectedCell !== -1 && !sudokuState.givens[sudokuState.selectedCell]) {
-    sudokuState.board[sudokuState.selectedCell] = 0;
-    sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+  if (value === 0) {
+    clearSudokuCell(sudokuState.selectedCell);
+    return;
+  }
+
+  if (sudokuState.selectedNumber === 0) {
+    return;
+  }
+
+  if (sudokuState.noteMode) {
+    toggleSudokuNote(sudokuState.selectedCell, sudokuState.selectedNumber);
+    return;
+  }
+
+  applySudokuInput(sudokuState.selectedCell, sudokuState.selectedNumber);
+}
+
+function handleSudokuAction(action) {
+  if (!sudokuState.running || sudokuState.completed) {
+    return;
+  }
+
+  if (action === "notes") {
+    sudokuState.noteMode = !sudokuState.noteMode;
+    renderSudokuControls();
+    return;
+  }
+
+  if (action === "undo" && sudokuState.history.length > 0) {
+    const snapshot = sudokuState.history.pop();
+
+    sudokuState.board = [...snapshot.board];
+    sudokuState.notes = cloneSudokuNotes(snapshot.notes);
+    sudokuState.filledCount = snapshot.filledCount;
+    sudokuState.selectedCell = snapshot.selectedCell;
+    sudokuState.selectedNumber = snapshot.selectedNumber;
+    sudokuState.invalidCell = -1;
+
     updateHud(performance.now());
     renderSudokuBoard();
+    renderSudokuControls();
   }
+}
+
+function clearSudokuCell(index) {
+  if (sudokuState.givens[index]) {
+    return;
+  }
+
+  if (sudokuState.board[index] === 0 && sudokuState.notes[index].length === 0) {
+    return;
+  }
+
+  pushSudokuHistory();
+  sudokuState.board[index] = 0;
+  sudokuState.notes[index] = [];
+  sudokuState.invalidCell = -1;
+  sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+
+  updateHud(performance.now());
+  renderSudokuBoard();
+  renderSudokuControls();
+}
+
+function toggleSudokuNote(index, value) {
+  if (sudokuState.givens[index] || sudokuState.board[index] !== 0 || value < 1 || value > 9) {
+    return;
+  }
+
+  const notes = sudokuState.notes[index];
+  const nextNotes = notes.includes(value)
+    ? notes.filter((entry) => entry !== value)
+    : [...notes, value].sort((left, right) => left - right);
+
+  pushSudokuHistory();
+  sudokuState.notes[index] = nextNotes;
+  sudokuState.invalidCell = -1;
+
+  renderSudokuBoard();
+  renderSudokuControls();
 }
 
 function applySudokuInput(index, value) {
@@ -1512,10 +1662,11 @@ function applySudokuInput(index, value) {
   }
 
   if (value === 0) {
-    sudokuState.board[index] = 0;
-    sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
-    updateHud(performance.now());
-    renderSudokuBoard();
+    clearSudokuCell(index);
+    return;
+  }
+
+  if (sudokuState.board[index] === value) {
     return;
   }
 
@@ -1537,7 +1688,9 @@ function applySudokuInput(index, value) {
     return;
   }
 
+  pushSudokuHistory();
   sudokuState.board[index] = value;
+  sudokuState.notes[index] = [];
   sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
   updateHud(performance.now());
   renderSudokuBoard();
@@ -1581,13 +1734,31 @@ function finishSudokuGame() {
 function renderSudokuBoard() {
   sudokuCells.forEach((cell, index) => {
     const value = sudokuState.board[index];
+    const notes = sudokuState.notes[index];
     const isSelected = sudokuState.selectedCell === index;
     const isHighlight = sudokuState.selectedNumber !== 0 && value === sudokuState.selectedNumber;
 
-    cell.classList.remove("is-given", "is-selected", "is-highlight", "is-invalid");
-    cell.textContent = value === 0 ? "" : String(value);
+    cell.classList.remove("is-given", "is-selected", "is-highlight", "is-invalid", "has-notes");
+    cell.replaceChildren();
     cell.disabled = activeGame !== "sudoku" || sudokuState.completed;
     cell.setAttribute("aria-label", `${t("sudokuCellLabel")} ${index + 1}`);
+
+    if (value === 0 && notes.length > 0) {
+      const notesGrid = document.createElement("span");
+      notesGrid.className = "sudoku-notes";
+
+      for (let digit = 1; digit <= 9; digit += 1) {
+        const note = document.createElement("span");
+        note.className = "sudoku-note";
+        note.textContent = notes.includes(digit) ? String(digit) : "";
+        notesGrid.appendChild(note);
+      }
+
+      cell.classList.add("has-notes");
+      cell.appendChild(notesGrid);
+    } else {
+      cell.textContent = value === 0 ? "" : String(value);
+    }
 
     if (sudokuState.givens[index]) {
       cell.classList.add("is-given");
