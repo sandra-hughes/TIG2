@@ -534,6 +534,7 @@ input:focus-visible {
 
 .sudoku-cell {
   appearance: none;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
   aspect-ratio: 1;
@@ -599,11 +600,13 @@ input:focus-visible {
 }
 
 .sudoku-cell.is-block-right {
-  margin-right: 12px;
+  border-right-width: 4px;
+  border-right-color: rgba(124, 255, 178, 0.34);
 }
 
 .sudoku-cell.is-block-bottom {
-  margin-bottom: 12px;
+  border-bottom-width: 4px;
+  border-bottom-color: rgba(124, 255, 178, 0.34);
 }
 
 .sudoku-keypad {

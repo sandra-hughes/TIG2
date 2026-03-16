@@ -173,7 +173,7 @@ const I18N = {
         saveHintResult: (difficultyLabel, time, mistakes) => `Solved ${difficultyLabel} in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. Save it to the leaderboard.`,
         statusReady: (difficultyLabel) => `Choose a ${difficultyLabel} Sudoku puzzle and start solving.`,
         statusStarted: (difficultyLabel) => `${difficultyLabel} puzzle ready. Click a digit to highlight matching numbers, then fill the grid.`,
-        statusMistake: (value, mistakes) => `${value} does not fit there. Mistakes ${mistakes}.`,
+        statusMistake: (value, mistakes) => `${value} conflicts with the current row, column, or 3x3 box. Mistakes ${mistakes}.`,
         statusSolvedSave: (time, mistakes) => `Puzzle solved in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. This run can be saved.`,
         statusSolvedNoSave: (time, mistakes) => `Puzzle solved in ${time} with ${mistakes} mistake${mistakes === 1 ? "" : "s"}. It did not enter the current top 10.`,
         saveSuccess: (count) => `Sudoku result saved. ${count} local record${count === 1 ? "" : "s"} stored for this difficulty.`,
@@ -188,7 +188,7 @@ const I18N = {
           "Choose between Easy, Medium, Hard, and Expert before starting a puzzle.",
           "Click a digit such as <strong>2</strong> on the keypad to highlight every matching number already filled on the grid.",
           "Turn on Notes to draft candidates in empty cells, and use Undo to step back the last edit or erase.",
-          "Only editable cells can be changed. Wrong entries do not stay on the board and increase your mistake count.",
+          "Editable cells accept any digit that does not duplicate the current row, column, or 3x3 box. Conflicting inputs are blocked and count as mistakes.",
           "Rankings are stored separately for each difficulty and sorted by fastest clear time.",
         ],
         difficultyOptions: {
@@ -317,7 +317,7 @@ const I18N = {
         saveHintResult: (difficultyLabel, time, mistakes) => `${difficultyLabel} 难度完成用时 ${time}，失误 ${mistakes} 次。可保存到本地排行榜。`,
         statusReady: (difficultyLabel) => `选择 ${difficultyLabel} 难度后开始解题。`,
         statusStarted: (difficultyLabel) => `${difficultyLabel} 题目已载入。点击数字可高亮全盘相同数字，再填入空格。`,
-        statusMistake: (value, mistakes) => `${value} 不能填在这里。当前失误 ${mistakes} 次。`,
+        statusMistake: (value, mistakes) => `${value} 会与当前行、列或九宫格冲突。当前失误 ${mistakes} 次。`,
         statusSolvedSave: (time, mistakes) => `已完成本题，用时 ${time}，失误 ${mistakes} 次。本局可以保存。`,
         statusSolvedNoSave: (time, mistakes) => `已完成本题，用时 ${time}，失误 ${mistakes} 次，但未进入当前前 10。`,
         saveSuccess: (count) => `数独成绩已保存，该难度当前共有 ${count} 条本地记录。`,
@@ -332,7 +332,7 @@ const I18N = {
           "开始前可选择简单、中等、困难、专家四个难度。",
           "点击数字键，例如 <strong>2</strong>，会高亮棋盘上所有已经填入的 2。",
           "开启草稿模式后可以在空格里记录候选数，撤回按钮可以回退上一步输入或清除动作。",
-          "只有可编辑空格能被修改。错误输入不会保留在棋盘上，但会增加失误次数。",
+          "可编辑空格允许填写任意数字，但不能与当前行、列或九宫格中的同号重复。冲突输入会被拦下并计为失误。",
           "排行榜按难度分别保存，并按最短完成时间排序。",
         ],
         difficultyOptions: {
@@ -461,7 +461,7 @@ const I18N = {
         saveHintResult: (difficultyLabel, time, mistakes) => `${difficultyLabel} を ${time} でクリアし、ミスは ${mistakes} 回でした。ローカルランキングに保存できます。`,
         statusReady: (difficultyLabel) => `${difficultyLabel} の Sudoku を選んで開始してください。`,
         statusStarted: (difficultyLabel) => `${difficultyLabel} の問題を読み込みました。数字をクリックして同じ数字を強調表示し、空欄を埋めてください。`,
-        statusMistake: (value, mistakes) => `${value} はそこに入りません。ミスは ${mistakes} 回です。`,
+        statusMistake: (value, mistakes) => `${value} は現在の行・列・3x3 ブロックと衝突します。ミスは ${mistakes} 回です。`,
         statusSolvedSave: (time, mistakes) => `${time} でクリア、ミス ${mistakes} 回。この結果は保存できます。`,
         statusSolvedNoSave: (time, mistakes) => `${time} でクリア、ミス ${mistakes} 回。ただし現在の Top 10 には入りませんでした。`,
         saveSuccess: (count) => `Sudoku の結果を保存しました。この難易度には現在 ${count} 件のローカル記録があります。`,
@@ -476,7 +476,7 @@ const I18N = {
           "Easy、Medium、Hard、Expert の 4 段階から難易度を選べます。",
           "数字キー、たとえば <strong>2</strong> をクリックすると、盤面に入力済みの 2 がすべてハイライトされます。",
           "メモを有効にすると空欄に候補を書き込めます。取り消しで直前の入力や消去を戻せます。",
-          "編集できるのは空欄だけです。誤入力は盤面に残りませんが、ミス数は増えます。",
+          "編集可能なマスには任意の数字を入れられますが、現在の行・列・3x3 ブロックと重複する数字は入れられず、ミスとして数えられます。",
           "ランキングは難易度ごとに分かれており、最短クリア時間順で並びます。",
         ],
         difficultyOptions: {
@@ -1656,6 +1656,38 @@ function toggleSudokuNote(index, value) {
   renderSudokuControls();
 }
 
+function findSudokuConflict(index, value) {
+  const row = Math.floor(index / 9);
+  const col = index % 9;
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+
+  for (let currentCol = 0; currentCol < 9; currentCol += 1) {
+    const currentIndex = row * 9 + currentCol;
+    if (currentIndex !== index && sudokuState.board[currentIndex] === value) {
+      return true;
+    }
+  }
+
+  for (let currentRow = 0; currentRow < 9; currentRow += 1) {
+    const currentIndex = currentRow * 9 + col;
+    if (currentIndex !== index && sudokuState.board[currentIndex] === value) {
+      return true;
+    }
+  }
+
+  for (let boxRow = startRow; boxRow < startRow + 3; boxRow += 1) {
+    for (let boxCol = startCol; boxCol < startCol + 3; boxCol += 1) {
+      const currentIndex = boxRow * 9 + boxCol;
+      if (currentIndex !== index && sudokuState.board[currentIndex] === value) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 function applySudokuInput(index, value) {
   if (sudokuState.givens[index]) {
     return;
@@ -1670,7 +1702,7 @@ function applySudokuInput(index, value) {
     return;
   }
 
-  if (sudokuState.solution[index] !== value) {
+  if (findSudokuConflict(index, value)) {
     sudokuState.mistakes += 1;
     sudokuState.invalidCell = index;
     setGameStatus("sudoku", "statusMistake", value, sudokuState.mistakes);
@@ -1691,6 +1723,7 @@ function applySudokuInput(index, value) {
   pushSudokuHistory();
   sudokuState.board[index] = value;
   sudokuState.notes[index] = [];
+  sudokuState.invalidCell = -1;
   sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
   updateHud(performance.now());
   renderSudokuBoard();
@@ -1784,7 +1817,7 @@ function chooseSudokuPuzzle(difficulty) {
 }
 
 function isSudokuSolved() {
-  return sudokuState.board.every((value, index) => value === sudokuState.solution[index]);
+  return sudokuState.board.every((value, index) => value !== 0 && !findSudokuConflict(index, value));
 }
 
 function getSudokuDifficultyLabel() {
