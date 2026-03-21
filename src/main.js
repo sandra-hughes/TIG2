@@ -1,5 +1,6 @@
-﻿const GRID_SIZE = 12;
+const GRID_SIZE = 12;
 const ROUND_DURATION_MS = 45_000;
+const REACTION_FEEDBACK_CLEAR_MS = 260;
 const WIN_LINES = [
   [0, 1, 2],
   [3, 4, 5],
@@ -188,7 +189,7 @@ const I18N = {
           "Choose between Easy, Medium, Hard, and Expert before starting a puzzle.",
           "Click a digit such as <strong>2</strong> on the keypad to highlight every matching number already filled on the grid.",
           "Turn on Notes to draft candidates in empty cells, and use Undo to step back the last edit or erase.",
-          "Editable cells accept any digit that does not duplicate the current row, column, or 3x3 box. Conflicting inputs are blocked and count as mistakes.",
+          "Editable cells accept any digit 1\u20139. If the digit conflicts with the current row, column, or 3\u00d73 box, it is still placed but highlighted in red and counted as a mistake.",
           "Rankings are stored separately for each difficulty and sorted by fastest clear time.",
         ],
         difficultyOptions: {
@@ -332,7 +333,7 @@ const I18N = {
           "开始前可选择简单、中等、困难、专家四个难度。",
           "点击数字键，例如 <strong>2</strong>，会高亮棋盘上所有已经填入的 2。",
           "开启草稿模式后可以在空格里记录候选数，撤回按钮可以回退上一步输入或清除动作。",
-          "可编辑空格允许填写任意数字，但不能与当前行、列或九宫格中的同号重复。冲突输入会被拦下并计为失误。",
+          "可编辑空格允许填写任意数字，如果与当前行、列或九宫格中的同号重复，仍然会被填入但会用红色高亮显示，并计为失误。",
           "排行榜按难度分别保存，并按最短完成时间排序。",
         ],
         difficultyOptions: {
@@ -476,7 +477,7 @@ const I18N = {
           "Easy、Medium、Hard、Expert の 4 段階から難易度を選べます。",
           "数字キー、たとえば <strong>2</strong> をクリックすると、盤面に入力済みの 2 がすべてハイライトされます。",
           "メモを有効にすると空欄に候補を書き込めます。取り消しで直前の入力や消去を戻せます。",
-          "編集可能なマスには任意の数字を入れられますが、現在の行・列・3x3 ブロックと重複する数字は入れられず、ミスとして数えられます。",
+          "編集可能なマスには任意の数字を入れられますが、現在の行・列・3×3 ブロックと重複する場合もそのまま配置され、赤く表示されてミスとして数えられます。",
           "ランキングは難易度ごとに分かれており、最短クリア時間順で並びます。",
         ],
         difficultyOptions: {
@@ -687,8 +688,9 @@ function deactivateGame(gameId) {
     tttState = createTttState(tttState);
   }
 
-  if (gameId === "sudoku" && !sudokuState.running) {
+  if (gameId === "sudoku" && sudokuState.running) {
     clearInterval(sudokuState.timerId);
+    sudokuState = createSudokuState(sudokuState);
   }
 }
 
@@ -698,13 +700,21 @@ function handleLanguageChange(event) {
     return;
   }
 
-  currentLanguage = language;
-  localStorage.setItem(STORAGE_KEYS.language, currentLanguage);
-  applyLanguage(currentLanguage);
+  applyLanguage(language);
 }
 
 function applyLanguage(language) {
-  const copy = I18N[language];
+  const nextLanguage = Object.prototype.hasOwnProperty.call(I18N, language) ? language : DEFAULT_LANGUAGE;
+  if (nextLanguage !== currentLanguage) {
+    currentLanguage = nextLanguage;
+    try {
+      localStorage.setItem(STORAGE_KEYS.language, currentLanguage);
+    } catch (error) {
+      console.error("Failed to persist language", error);
+    }
+  }
+
+  const copy = I18N[currentLanguage];
 
   document.documentElement.lang = copy.htmlLang;
   document.title = copy.pageTitle;
@@ -1057,7 +1067,7 @@ function scheduleReactionFeedbackClear(index, feedback) {
         renderReactionArena(performance.now());
       }
     }
-  }, 180);
+  }, REACTION_FEEDBACK_CLEAR_MS);
 }
 
 function finishReactionGame() {
@@ -1702,12 +1712,17 @@ function applySudokuInput(index, value) {
     return;
   }
 
-  if (findSudokuConflict(index, value)) {
+  const hasConflict = findSudokuConflict(index, value);
+
+  pushSudokuHistory();
+  sudokuState.board[index] = value;
+  sudokuState.notes[index] = [];
+  sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
+
+  if (hasConflict) {
     sudokuState.mistakes += 1;
     sudokuState.invalidCell = index;
     setGameStatus("sudoku", "statusMistake", value, sudokuState.mistakes);
-    updateHud(performance.now());
-    renderSudokuBoard();
 
     window.setTimeout(() => {
       if (sudokuState.invalidCell === index) {
@@ -1716,15 +1731,11 @@ function applySudokuInput(index, value) {
           renderSudokuBoard();
         }
       }
-    }, 280);
-    return;
+    }, 800);
+  } else {
+    sudokuState.invalidCell = -1;
   }
 
-  pushSudokuHistory();
-  sudokuState.board[index] = value;
-  sudokuState.notes[index] = [];
-  sudokuState.invalidCell = -1;
-  sudokuState.filledCount = sudokuState.board.filter((cell) => cell !== 0).length;
   updateHud(performance.now());
   renderSudokuBoard();
 
@@ -1771,8 +1782,14 @@ function renderSudokuBoard() {
     const isSelected = sudokuState.selectedCell === index;
     const isHighlight = sudokuState.selectedNumber !== 0 && value === sudokuState.selectedNumber;
 
-    cell.classList.remove("is-given", "is-selected", "is-highlight", "is-invalid", "has-notes");
-    cell.replaceChildren();
+    cell.classList.remove("is-given", "is-selected", "is-highlight", "is-invalid", "has-notes", "is-conflict");
+    if (typeof cell.replaceChildren === "function") {
+      cell.replaceChildren();
+    } else {
+      while (cell.firstChild) {
+        cell.removeChild(cell.firstChild);
+      }
+    }
     cell.disabled = activeGame !== "sudoku" || sudokuState.completed;
     cell.setAttribute("aria-label", `${t("sudokuCellLabel")} ${index + 1}`);
 
@@ -1808,6 +1825,10 @@ function renderSudokuBoard() {
     if (sudokuState.invalidCell === index) {
       cell.classList.add("is-invalid");
     }
+
+    if (value !== 0 && !sudokuState.givens[index] && findSudokuConflict(index, value)) {
+      cell.classList.add("is-conflict");
+    }
   });
 }
 
@@ -1817,7 +1838,7 @@ function chooseSudokuPuzzle(difficulty) {
 }
 
 function isSudokuSolved() {
-  return sudokuState.board.every((value, index) => value !== 0 && !findSudokuConflict(index, value));
+  return sudokuState.board.every((value, index) => value === sudokuState.solution[index]);
 }
 
 function getSudokuDifficultyLabel() {
@@ -1842,13 +1863,22 @@ function handleSaveScore(event) {
 
   const rawName = playerNameInput.value.trim();
   const safeName = sanitizeName(rawName || "Player");
-  localStorage.setItem(STORAGE_KEYS.playerName, safeName);
+  try {
+    localStorage.setItem(STORAGE_KEYS.playerName, safeName);
+  } catch (error) {
+    console.error("Failed to persist player name", error);
+  }
 
   const entry = { name: safeName, ...state.pendingResult };
-  const currentEntries = getLeaderboardEntries(activeGame);
-  const nextEntries = sortLeaderboard(activeGame, [...currentEntries, entry]).slice(0, 10);
+  const previousEntries = getLeaderboardEntries(activeGame);
+  const nextEntries = sortLeaderboard(activeGame, [...previousEntries, entry]).slice(0, 10);
   setLeaderboardEntries(activeGame, nextEntries);
-  persistLeaderboard(activeGame);
+  const persisted = persistLeaderboard(activeGame);
+  if (!persisted) {
+    setLeaderboardEntries(activeGame, previousEntries);
+    renderLeaderboard();
+    return;
+  }
 
   state.pendingResult = null;
   saveForm.hidden = true;
@@ -1878,8 +1908,15 @@ function handleClearLeaderboard() {
     return;
   }
 
+  const previousEntries = [...getLeaderboardEntries(activeGame)];
   setLeaderboardEntries(activeGame, []);
-  persistLeaderboard(activeGame);
+  const persisted = persistLeaderboard(activeGame);
+  if (!persisted) {
+    setLeaderboardEntries(activeGame, previousEntries);
+    renderLeaderboard();
+    return;
+  }
+
   renderLeaderboard();
   setGameStatus(activeGame, "clearDone");
 }
@@ -2099,17 +2136,23 @@ function loadSudokuLeaderboard() {
 }
 
 function persistLeaderboard(gameId) {
-  if (gameId === "reaction") {
-    localStorage.setItem(STORAGE_KEYS.reactionLeaderboard, JSON.stringify(leaderboards.reaction));
-    return;
-  }
+  try {
+    if (gameId === "reaction") {
+      localStorage.setItem(STORAGE_KEYS.reactionLeaderboard, JSON.stringify(leaderboards.reaction));
+      return true;
+    }
 
-  if (gameId === "ttt") {
-    localStorage.setItem(STORAGE_KEYS.tttLeaderboard, JSON.stringify(leaderboards.ttt));
-    return;
-  }
+    if (gameId === "ttt") {
+      localStorage.setItem(STORAGE_KEYS.tttLeaderboard, JSON.stringify(leaderboards.ttt));
+      return true;
+    }
 
-  localStorage.setItem(STORAGE_KEYS.sudokuLeaderboard, JSON.stringify(leaderboards.sudoku));
+    localStorage.setItem(STORAGE_KEYS.sudokuLeaderboard, JSON.stringify(leaderboards.sudoku));
+    return true;
+  } catch (error) {
+    console.error("Failed to persist leaderboard", error);
+    return false;
+  }
 }
 
 function loadLanguage() {
